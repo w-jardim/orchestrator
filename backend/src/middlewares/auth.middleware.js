@@ -18,6 +18,7 @@ function authenticate(req, res, next) {
 
   try {
     const payload = verifyAccessToken(token);
+    payload.tenantId = payload.tenant_id ?? null;
     req.user = payload;
     return next();
   } catch (err) {

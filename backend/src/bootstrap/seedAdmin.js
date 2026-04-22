@@ -2,13 +2,21 @@
 
 const logger = require('@plagard/core/src/logger');
 const { findByEmail, createUser } = require('../services/user.service');
+const { ensureDefaultTenant } = require('../services/tenant.service');
 
 async function seedAdmin() {
   const adminEmail = 'admin@plagard.local';
+
   try {
+    const defaultTenant = await ensureDefaultTenant();
     const existing = await findByEmail(adminEmail);
+
     if (existing) {
-      logger.info('Admin user already exists', { email: adminEmail });
+      logger.info('Admin user already exists', {
+        email: adminEmail,
+        tenantId: existing.tenant_id ?? null,
+        defaultTenantId: defaultTenant.id,
+      });
       return existing;
     }
 
@@ -19,7 +27,12 @@ async function seedAdmin() {
       role: 'ADMIN_MASTER',
     });
 
-    logger.info('Admin user created by seed', { email: adminEmail, id: admin.id });
+    logger.info('Admin user created by seed', {
+      email: adminEmail,
+      id: admin.id,
+      defaultTenantId: defaultTenant.id,
+    });
+
     return admin;
   } catch (err) {
     logger.error('Failed to seed admin user', { error: err.message });

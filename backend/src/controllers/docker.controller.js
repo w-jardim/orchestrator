@@ -12,65 +12,84 @@ function handleValidation(req, res) {
   return true;
 }
 
-// GET /api/docker/containers?all=true
 async function list(req, res, next) {
   try {
     if (!handleValidation(req, res)) return;
     const all = req.query.all === 'true';
-    const containers = await dockerService.listContainers({ all, user: req.user });
+    const containers = await dockerService.listContainers({
+      all,
+      user: req.user,
+      tenantScope: req.tenantScope,
+    });
     return res.json({ success: true, count: containers.length, data: containers });
   } catch (err) {
     return next(err);
   }
 }
 
-// GET /api/docker/containers/:id
 async function inspect(req, res, next) {
   try {
     if (!handleValidation(req, res)) return;
-    const container = await dockerService.getContainer({ id: req.params.id, user: req.user });
+    const container = await dockerService.getContainer({
+      id: req.params.id,
+      user: req.user,
+      tenantScope: req.tenantScope,
+    });
     return res.json({ success: true, data: container });
   } catch (err) {
     return next(err);
   }
 }
 
-// POST /api/docker/containers/:id/start
 async function start(req, res, next) {
   try {
     if (!handleValidation(req, res)) return;
-    await dockerService.startContainer({ id: req.params.id, user: req.user, ip: req.ip });
+    await dockerService.startContainer({
+      id: req.params.id,
+      user: req.user,
+      ip: req.ip,
+      tenantScope: req.tenantScope,
+    });
     return res.json({ success: true, message: 'Container iniciado com sucesso' });
   } catch (err) {
     return next(err);
   }
 }
 
-// POST /api/docker/containers/:id/stop
 async function stop(req, res, next) {
   try {
     if (!handleValidation(req, res)) return;
     const timeout = Number(req.body?.timeout) || 10;
-    await dockerService.stopContainer({ id: req.params.id, timeout, user: req.user, ip: req.ip });
+    await dockerService.stopContainer({
+      id: req.params.id,
+      timeout,
+      user: req.user,
+      ip: req.ip,
+      tenantScope: req.tenantScope,
+    });
     return res.json({ success: true, message: 'Container parado com sucesso' });
   } catch (err) {
     return next(err);
   }
 }
 
-// POST /api/docker/containers/:id/restart
 async function restart(req, res, next) {
   try {
     if (!handleValidation(req, res)) return;
     const timeout = Number(req.body?.timeout) || 10;
-    await dockerService.restartContainer({ id: req.params.id, timeout, user: req.user, ip: req.ip });
+    await dockerService.restartContainer({
+      id: req.params.id,
+      timeout,
+      user: req.user,
+      ip: req.ip,
+      tenantScope: req.tenantScope,
+    });
     return res.json({ success: true, message: 'Container reiniciado com sucesso' });
   } catch (err) {
     return next(err);
   }
 }
 
-// GET /api/docker/containers/:id/logs?tail=100&timestamps=false
 async function logs(req, res, next) {
   try {
     if (!handleValidation(req, res)) return;
@@ -82,6 +101,7 @@ async function logs(req, res, next) {
       timestamps,
       user: req.user,
       ip: req.ip,
+      tenantScope: req.tenantScope,
     });
     return res.json({ success: true, count: lines.length, data: lines });
   } catch (err) {

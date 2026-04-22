@@ -6,44 +6,35 @@ const { ROLES } = require('@plagard/core/src/policies');
 const controller = require('../controllers/docker.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
 const { requireRole } = require('../middlewares/rbac');
+const tenantContext = require('../middlewares/tenant-context.middleware');
 const createDockerRateLimiter = require('../middlewares/rateLimit');
 const validate = require('../middlewares/validate');
 
 const router = Router();
 
 router.use(authenticate);
+router.use(tenantContext);
 router.use(createDockerRateLimiter());
 
 const validateId = [
   param('id')
     .trim()
-    .matches(/^(?:[a-f0-9]{12}|[a-f0-9]{64}|[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127})$/)
+    .matches(/^(?:[a-f0-9]{12}|[a-f0-9]{64}|[a-z0-9][a-z0-9_.-]{0,190})$/)
     .withMessage('ID de container invalido: use ID Docker hex ou nome seguro'),
 ];
 
 const validateLogsQuery = [
-  query('tail')
-    .optional()
-    .isInt({ min: 1, max: 500 })
-    .withMessage('tail deve ser inteiro entre 1 e 500'),
-  query('timestamps')
-    .optional()
-    .isBoolean()
-    .withMessage('timestamps deve ser true ou false'),
+  query('tail').optional().isInt({ min: 1, max: 200 }).withMessage('tail deve ser inteiro entre 1 e 200'),
+  query('timestamps').optional().isBoolean().withMessage('timestamps deve ser true ou false'),
 ];
 
 const validateTimeout = [
-  body('timeout')
-    .optional()
-    .isInt({ min: 1, max: 60 })
-    .withMessage('timeout deve ser inteiro entre 1 e 60 segundos'),
+  body('timeout').optional().isInt({ min: 1, max: 60 }).withMessage('timeout deve ser inteiro entre 1 e 60 segundos'),
 ];
 
 const validateListQuery = [
-  query('all')
-    .optional()
-    .isBoolean()
-    .withMessage('all deve ser true ou false'),
+  query('all').optional().isBoolean().withMessage('all deve ser true ou false'),
+  query('tenantId').optional().isInt({ min: 1 }).withMessage('tenantId invalido'),
 ];
 
 router.get('/', requireRole(ROLES.VIEWER), validateListQuery, validate, controller.list);

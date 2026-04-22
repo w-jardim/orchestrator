@@ -6,6 +6,7 @@ services:
     image: plagard-backend-test
     container_name: plagard-backend
     restart: unless-stopped
+    user: root
     group_add:
       - "${DOCKER_GID:-998}"
     ports:

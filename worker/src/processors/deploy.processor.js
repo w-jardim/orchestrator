@@ -9,7 +9,6 @@ const { logAction } = require('@plagard/backend/src/services/audit.service');
 async function deployProcessor(job) {
   const {
     deployId,
-    name,
     image,
     ports = [],
     env = {},
@@ -18,32 +17,41 @@ async function deployProcessor(job) {
     replaceExisting = false,
   } = job.data;
 
+  const currentDeploy = await deployService.findDeployById(deployId);
+  const containerName = currentDeploy?.containerName || job.data.containerName || job.data.name;
+  const tenantId = currentDeploy?.tenantId || user?.tenant_id || null;
+
   logger.info('Processing deploy job', {
     deployId,
+    tenantId,
     jobId: job.id,
-    name,
+    containerName,
     image,
     attempt: job.attemptsMade + 1,
   });
 
-  const currentDeploy = await deployService.findDeployById(deployId);
-
   await deployService.markDeployRunning(deployId);
   await logAction({
+    tenantId,
     userId: user?.id ?? null,
     role: user?.role ?? null,
     action: 'deploy_started',
     resource: String(deployId),
-    container: name,
+    container: containerName,
     ipAddress: ip,
-    payload: { deployId, name, image },
+    payload: {
+      deployId,
+      tenantId,
+      containerName,
+      image,
+    },
     status: 'success',
     timestamp: new Date().toISOString(),
   });
 
   try {
     const container = await dockerService.runContainer({
-      name,
+      name: containerName,
       image,
       ports,
       env,
@@ -68,14 +76,16 @@ async function deployProcessor(job) {
     });
 
     await logAction({
+      tenantId,
       userId: user?.id ?? null,
       role: user?.role ?? null,
       action: 'deploy_success',
       resource: String(deployId),
-      container: name,
+      container: containerName,
       ipAddress: ip,
       payload: {
         deployId,
+        tenantId,
         containerId: container.fullId,
       },
       status: 'success',
@@ -89,7 +99,8 @@ async function deployProcessor(job) {
     };
   } catch (err) {
     const recoveredContainer = await dockerService.findManagedContainer(
-      currentDeploy?.containerId || name
+      currentDeploy?.containerId || currentDeploy?.containerName || containerName,
+      { user, tenantScope: { tenantId } }
     ).catch(() => null);
 
     if (recoveredContainer?.state?.running) {
@@ -108,14 +119,16 @@ async function deployProcessor(job) {
       });
 
       await logAction({
+        tenantId,
         userId: user?.id ?? null,
         role: user?.role ?? null,
         action: 'deploy_success',
         resource: String(deployId),
-        container: name,
+        container: containerName,
         ipAddress: ip,
         payload: {
           deployId,
+          tenantId,
           containerId: recoveredContainer.fullId,
           recoveredFromError: err.code || err.message,
         },
@@ -125,7 +138,8 @@ async function deployProcessor(job) {
 
       logger.warn('Deploy recovered after transient Docker error', {
         deployId,
-        name,
+        tenantId,
+        containerName,
         recoveredFrom: err.code || err.message,
         containerId: recoveredContainer.fullId,
       });
@@ -138,7 +152,7 @@ async function deployProcessor(job) {
       };
     }
 
-    const logs = await dockerIntegration.getContainerLogs(name, {
+    const logs = await dockerIntegration.getContainerLogs(containerName, {
       tail: 50,
       timestamps: true,
     }).catch(() => []);
@@ -153,14 +167,16 @@ async function deployProcessor(job) {
     });
 
     await logAction({
+      tenantId,
       userId: user?.id ?? null,
       role: user?.role ?? null,
       action: 'deploy_failed',
       resource: String(deployId),
-      container: name,
+      container: containerName,
       ipAddress: ip,
       payload: {
         deployId,
+        tenantId,
         error: err.code || err.message,
       },
       status: 'failure',
@@ -169,7 +185,8 @@ async function deployProcessor(job) {
 
     logger.error('Deploy job failed', {
       deployId,
-      name,
+      tenantId,
+      containerName,
       error: err.message,
       code: err.code,
     });

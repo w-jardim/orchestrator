@@ -10,7 +10,7 @@ const DOCKER_TIMEOUT_MS = Number(process.env.DOCKER_TIMEOUT_MS) || 5000;
 const DOCKER_RUN_TIMEOUT_MS = Number(process.env.DOCKER_RUN_TIMEOUT_MS) || Math.max(DOCKER_TIMEOUT_MS, 30000);
 const MAX_LOG_TAIL = 200;
 const INTERNAL_CONTAINER_ID_RE = /^(?:[a-f0-9]{12}|[a-f0-9]{64}|[a-z0-9][a-z0-9_.-]{0,127})$/;
-const CONTAINER_NAME_RE = /^[a-z0-9][a-z0-9_.-]{2,62}$/;
+const CONTAINER_NAME_RE = /^[a-z0-9][a-z0-9_.-]{2,190}$/;
 const DOCKER_IMAGE_RE = /^(?:(?:[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?(?::[0-9]+)?\/)*[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?)(?::[\w][\w.-]{0,127})?$/i;
 const FALLBACK_ALLOWED_CONTAINERS = [
   'plagard-backend',
@@ -60,31 +60,25 @@ function withTimeout(promise, ms) {
 
 function validateId(id) {
   const normalizedId = normalizeContainerId(id);
-
   if (!normalizedId || !INTERNAL_CONTAINER_ID_RE.test(normalizedId)) {
     throw new AppError('ID de container invalido', 400, 'INVALID_CONTAINER_ID');
   }
-
   return normalizedId;
 }
 
 function validateContainerName(name) {
   const normalizedName = normalizeContainerId(name);
-
   if (!CONTAINER_NAME_RE.test(normalizedName)) {
     throw new AppError('Nome de container invalido', 422, 'INVALID_CONTAINER_NAME');
   }
-
   return normalizedName;
 }
 
 function validateImage(image) {
   const normalizedImage = normalizeImage(image);
-
   if (!DOCKER_IMAGE_RE.test(normalizedImage)) {
     throw new AppError('Imagem Docker invalida', 422, 'INVALID_DOCKER_IMAGE');
   }
-
   return normalizedImage;
 }
 
@@ -103,18 +97,11 @@ function extractCandidateNames(container) {
   if (Array.isArray(container?.names)) {
     container.names.forEach((name) => names.add(normalizeContainerName(name)));
   }
-
-  if (container?.name) {
-    names.add(normalizeContainerName(container.name));
-  }
-
+  if (container?.name) names.add(normalizeContainerName(container.name));
   if (Array.isArray(container?.Names)) {
     container.Names.forEach((name) => names.add(normalizeContainerName(name)));
   }
-
-  if (container?.Name) {
-    names.add(normalizeContainerName(container.Name));
-  }
+  if (container?.Name) names.add(normalizeContainerName(container.Name));
 
   return Array.from(names).filter(Boolean);
 }
@@ -123,11 +110,28 @@ function getContainerRef(container) {
   return normalizeContainerId(container?.fullId || container?.Id || '');
 }
 
-function isAllowedContainer(container) {
-  const candidateNames = extractCandidateNames(container);
-  const containerRef = getContainerRef(container);
+function getTenantPrefix(tenantId) {
+  return tenantId ? `plagard-${tenantId}-` : null;
+}
 
-  return candidateNames.some((name) => ALLOWED_CONTAINERS.has(name)) || ALLOWED_CONTAINERS.has(containerRef);
+function resolveTenantScope(user, tenantScope) {
+  if (user?.role === ROLES.ADMIN_MASTER) {
+    return tenantScope?.tenantId ? Number(tenantScope.tenantId) : null;
+  }
+
+  return user?.tenant_id ? Number(user.tenant_id) : null;
+}
+
+function isInternalContainer(container) {
+  const names = extractCandidateNames(container);
+  const ref = getContainerRef(container);
+  return names.some((name) => ALLOWED_CONTAINERS.has(name)) || ALLOWED_CONTAINERS.has(ref);
+}
+
+function isTenantContainer(container, tenantId) {
+  const prefix = getTenantPrefix(tenantId);
+  if (!prefix) return false;
+  return extractCandidateNames(container).some((name) => name.startsWith(prefix));
 }
 
 function getAuditContext({ user, container, action, ip, timestamp = new Date().toISOString(), status, error }) {
@@ -135,6 +139,7 @@ function getAuditContext({ user, container, action, ip, timestamp = new Date().t
   const fullId = getContainerRef(container) || null;
 
   return {
+    tenantId: user?.tenant_id ?? null,
     userId: user?.id ?? null,
     role: user?.role ?? null,
     container: containerName || fullId,
@@ -143,6 +148,7 @@ function getAuditContext({ user, container, action, ip, timestamp = new Date().t
     timestamp,
     resource: containerName || fullId,
     payload: {
+      tenantId: user?.tenant_id ?? null,
       userId: user?.id ?? null,
       role: user?.role ?? null,
       container: containerName,
@@ -154,18 +160,6 @@ function getAuditContext({ user, container, action, ip, timestamp = new Date().t
     },
     status,
   };
-}
-
-function ensureContainerAllowed(container, requestedId) {
-  if (isAllowedContainer(container)) return container;
-
-  logger.warn('Blocked access to non-whitelisted container', {
-    requestedId,
-    containerId: getContainerRef(container) || requestedId,
-    containerNames: extractCandidateNames(container),
-  });
-
-  throw new AppError('Container nao permitido', 403, 'CONTAINER_NOT_ALLOWED');
 }
 
 function ensureRole(user, requiredRole, action, containerId) {
@@ -182,28 +176,56 @@ function ensureRole(user, requiredRole, action, containerId) {
   throw new AppError('Acesso negado', 403, 'FORBIDDEN');
 }
 
-async function resolveAllowedContainer(id) {
-  const container = await dockerIntegration.inspectContainer(id);
-  return ensureContainerAllowed(container, id);
+function ensureTenantContainerAccess(container, user, tenantScope, requestedId) {
+  const scopedTenantId = resolveTenantScope(user, tenantScope);
+
+  if (user?.role === ROLES.ADMIN_MASTER) {
+    if (!scopedTenantId) return container;
+    if (isTenantContainer(container, scopedTenantId)) return container;
+    throw new AppError('Acesso negado ao tenant solicitado', 403, 'FORBIDDEN_TENANT_SCOPE');
+  }
+
+  if (!scopedTenantId) {
+    throw new AppError('Escopo de tenant obrigatorio', 403, 'FORBIDDEN_TENANT_SCOPE');
+  }
+
+  if (isTenantContainer(container, scopedTenantId)) {
+    return container;
+  }
+
+  logger.warn('Cross-tenant Docker access blocked', {
+    userId: user?.id ?? null,
+    tenantId: scopedTenantId,
+    requestedId,
+    containerNames: extractCandidateNames(container),
+  });
+
+  throw new AppError('Acesso negado ao tenant solicitado', 403, 'FORBIDDEN_TENANT_SCOPE');
 }
 
-async function findContainer(id, { requireAllowed = true } = {}) {
+async function resolveContainer(id, { user, tenantScope, requireAllowedInternal = true } = {}) {
+  const container = await dockerIntegration.inspectContainer(id);
+
+  if (user?.role === ROLES.ADMIN_MASTER) {
+    if (!tenantScope?.tenantId) return container;
+    return ensureTenantContainerAccess(container, user, tenantScope, id);
+  }
+
+  if (requireAllowedInternal && isInternalContainer(container)) {
+    throw new AppError('Acesso negado ao tenant solicitado', 403, 'FORBIDDEN_TENANT_SCOPE');
+  }
+
+  return ensureTenantContainerAccess(container, user, tenantScope, id);
+}
+
+async function findContainer(id, options = {}) {
   try {
-    const container = await dockerIntegration.inspectContainer(id);
-    return requireAllowed ? ensureContainerAllowed(container, id) : container;
+    return await resolveContainer(id, options);
   } catch (err) {
     const mappedError = mapDockerError(err);
-    if (mappedError.code === 'CONTAINER_NOT_FOUND') {
-      return null;
-    }
+    if (mappedError.code === 'CONTAINER_NOT_FOUND') return null;
     throw mappedError;
   }
-}
-
-async function findManagedContainer(id) {
-  const normalizedId = normalizeContainerId(id);
-  if (!normalizedId) return null;
-  return findContainer(normalizedId, { requireAllowed: false });
 }
 
 function mapDockerError(err) {
@@ -232,6 +254,18 @@ function sanitizeEnv(env) {
   }, {});
 }
 
+function filterContainersForScope(containers, user, tenantScope) {
+  const scopedTenantId = resolveTenantScope(user, tenantScope);
+
+  if (user?.role === ROLES.ADMIN_MASTER) {
+    if (!scopedTenantId) return containers;
+    return containers.filter((container) => isTenantContainer(container, scopedTenantId));
+  }
+
+  if (!scopedTenantId) return [];
+  return containers.filter((container) => isTenantContainer(container, scopedTenantId));
+}
+
 async function runContainer({ name, image, ports = [], env = {}, containerId = null, user, ip, replaceExisting = true } = {}) {
   const normalizedName = validateContainerName(name);
   const normalizedImage = validateImage(image);
@@ -242,13 +276,20 @@ async function runContainer({ name, image, ports = [], env = {}, containerId = n
 
   try {
     const existingContainer = normalizedContainerId
-      ? await withTimeout(findContainer(normalizedContainerId, { requireAllowed: false }), DOCKER_RUN_TIMEOUT_MS)
+      ? await withTimeout(findContainer(normalizedContainerId, {
+        user,
+        tenantScope: { tenantId: user?.tenant_id ?? null },
+        requireAllowedInternal: false,
+      }), DOCKER_RUN_TIMEOUT_MS)
       : null;
 
     if (existingContainer) {
       await withTimeout(dockerIntegration.restartContainer(normalizedContainerId), DOCKER_RUN_TIMEOUT_MS);
-
-      const restartedContainer = await withTimeout(findContainer(normalizedContainerId, { requireAllowed: false }), DOCKER_RUN_TIMEOUT_MS);
+      const restartedContainer = await withTimeout(findContainer(normalizedContainerId, {
+        user,
+        tenantScope: { tenantId: user?.tenant_id ?? null },
+        requireAllowedInternal: false,
+      }), DOCKER_RUN_TIMEOUT_MS);
 
       await logAction(getAuditContext({
         user,
@@ -262,7 +303,11 @@ async function runContainer({ name, image, ports = [], env = {}, containerId = n
     }
 
     if (replaceExisting) {
-      const existingByName = await withTimeout(findContainer(normalizedName, { requireAllowed: false }), DOCKER_RUN_TIMEOUT_MS);
+      const existingByName = await withTimeout(findContainer(normalizedName, {
+        user,
+        tenantScope: { tenantId: user?.tenant_id ?? null },
+        requireAllowedInternal: false,
+      }), DOCKER_RUN_TIMEOUT_MS);
       if (existingByName) {
         await withTimeout(dockerIntegration.removeContainer(normalizedName, { force: true }), DOCKER_RUN_TIMEOUT_MS);
       }
@@ -297,9 +342,26 @@ async function runContainer({ name, image, ports = [], env = {}, containerId = n
   }
 }
 
+async function findManagedContainer(id, { user, tenantScope } = {}) {
+  const normalizedId = normalizeContainerId(id);
+  if (!normalizedId) return null;
+
+  return findContainer(normalizedId, {
+    user,
+    tenantScope,
+    requireAllowedInternal: false,
+  });
+}
+
 async function stopManagedContainer({ id, timeout = 10, user, ip }) {
-  const normalizedId = validateId(id);
+  const normalizedId = validateContainerName(id) || validateId(id);
   ensureRole(user, ROLES.ADMIN, 'docker.container.stop.managed', normalizedId);
+
+  const container = await findManagedContainer(normalizedId, {
+    user,
+    tenantScope: { tenantId: user?.tenant_id ?? null },
+  });
+  if (!container) throw new AppError('Container nao encontrado', 404, 'CONTAINER_NOT_FOUND');
 
   try {
     await withTimeout(dockerIntegration.stopContainer(normalizedId, {
@@ -308,7 +370,7 @@ async function stopManagedContainer({ id, timeout = 10, user, ip }) {
 
     await logAction(getAuditContext({
       user,
-      container: { fullId: normalizedId, name: normalizedId },
+      container,
       action: 'docker.container.stop.managed',
       ip,
       status: 'success',
@@ -316,7 +378,7 @@ async function stopManagedContainer({ id, timeout = 10, user, ip }) {
   } catch (err) {
     await logAction(getAuditContext({
       user,
-      container: { fullId: normalizedId, name: normalizedId },
+      container,
       action: 'docker.container.stop.managed',
       ip,
       status: 'failure',
@@ -326,51 +388,47 @@ async function stopManagedContainer({ id, timeout = 10, user, ip }) {
   }
 }
 
-async function listContainers({ all = false, user } = {}) {
+async function listContainers({ all = false, user, tenantScope } = {}) {
   ensureRole(user, ROLES.VIEWER, 'docker.container.list');
-  logger.info('docker.listContainers', { userId: user?.id, all });
+  logger.info('docker.listContainers', { userId: user?.id, tenantId: tenantScope?.tenantId || user?.tenant_id || null, all });
 
   try {
     const containers = await withTimeout(dockerIntegration.listContainers({ all }), DOCKER_TIMEOUT_MS);
-    const allowedContainers = containers.filter(isAllowedContainer);
+    const scopedContainers = filterContainersForScope(containers, user, tenantScope);
 
     logger.info('Containers listed', {
       userId: user?.id,
-      count: allowedContainers.length,
-      filteredOut: containers.length - allowedContainers.length,
+      count: scopedContainers.length,
     });
 
-    return allowedContainers;
+    return scopedContainers;
   } catch (err) {
     logger.error('Failed listing containers', { error: err.message });
     throw mapDockerError(err);
   }
 }
 
-async function getContainer({ id, user }) {
-  const normalizedId = validateId(id);
-  ensureRole(user, ROLES.VIEWER, 'docker.container.inspect', normalizedId);
-  logger.info('docker.inspectContainer', { containerId: normalizedId, userId: user?.id });
+async function getContainer({ id, user, tenantScope }) {
+  ensureRole(user, ROLES.VIEWER, 'docker.container.inspect', id);
+  logger.info('docker.inspectContainer', { containerId: id, userId: user?.id });
 
   try {
-    return await withTimeout(resolveAllowedContainer(normalizedId), DOCKER_TIMEOUT_MS);
+    return await withTimeout(resolveContainer(id, { user, tenantScope }), DOCKER_TIMEOUT_MS);
   } catch (err) {
     throw mapDockerError(err);
   }
 }
 
-async function startContainer({ id, user, ip }) {
-  const normalizedId = validateId(id);
-  ensureRole(user, ROLES.ADMIN, 'docker.container.start', normalizedId);
-  logger.info('docker.startContainer', { containerId: normalizedId, userId: user?.id });
+async function startContainer({ id, user, ip, tenantScope }) {
+  ensureRole(user, ROLES.ADMIN, 'docker.container.start', id);
+  logger.info('docker.startContainer', { containerId: id, userId: user?.id });
 
   let container = null;
 
   try {
-    container = await withTimeout(resolveAllowedContainer(normalizedId), DOCKER_TIMEOUT_MS);
-    await withTimeout(dockerIntegration.startContainer(normalizedId), DOCKER_TIMEOUT_MS);
+    container = await withTimeout(resolveContainer(id, { user, tenantScope }), DOCKER_TIMEOUT_MS);
+    await withTimeout(dockerIntegration.startContainer(id), DOCKER_TIMEOUT_MS);
 
-    logger.info('Container started successfully', { containerId: normalizedId, userId: user?.id });
     await logAction(getAuditContext({
       user,
       container,
@@ -381,7 +439,7 @@ async function startContainer({ id, user, ip }) {
   } catch (err) {
     await logAction(getAuditContext({
       user,
-      container: container || { fullId: normalizedId, name: normalizedId },
+      container: container || { fullId: id, name: id },
       action: 'docker.container.start',
       ip,
       status: 'failure',
@@ -391,20 +449,16 @@ async function startContainer({ id, user, ip }) {
   }
 }
 
-async function stopContainer({ id, timeout = 10, user, ip }) {
-  const normalizedId = validateId(id);
-  ensureRole(user, ROLES.ADMIN, 'docker.container.stop', normalizedId);
-
+async function stopContainer({ id, timeout = 10, user, ip, tenantScope }) {
+  ensureRole(user, ROLES.ADMIN, 'docker.container.stop', id);
   const safeTimeout = Math.min(Math.max(1, Number(timeout) || 10), 60);
-  logger.info('docker.stopContainer', { containerId: normalizedId, userId: user?.id, timeout: safeTimeout });
 
   let container = null;
 
   try {
-    container = await withTimeout(resolveAllowedContainer(normalizedId), DOCKER_TIMEOUT_MS);
-    await withTimeout(dockerIntegration.stopContainer(normalizedId, { timeout: safeTimeout }), DOCKER_TIMEOUT_MS);
+    container = await withTimeout(resolveContainer(id, { user, tenantScope }), DOCKER_TIMEOUT_MS);
+    await withTimeout(dockerIntegration.stopContainer(id, { timeout: safeTimeout }), DOCKER_TIMEOUT_MS);
 
-    logger.info('Container stopped successfully', { containerId: normalizedId, userId: user?.id });
     await logAction(getAuditContext({
       user,
       container,
@@ -415,7 +469,7 @@ async function stopContainer({ id, timeout = 10, user, ip }) {
   } catch (err) {
     await logAction(getAuditContext({
       user,
-      container: container || { fullId: normalizedId, name: normalizedId },
+      container: container || { fullId: id, name: id },
       action: 'docker.container.stop',
       ip,
       status: 'failure',
@@ -425,20 +479,16 @@ async function stopContainer({ id, timeout = 10, user, ip }) {
   }
 }
 
-async function restartContainer({ id, timeout = 10, user, ip }) {
-  const normalizedId = validateId(id);
-  ensureRole(user, ROLES.ADMIN, 'docker.container.restart', normalizedId);
-
+async function restartContainer({ id, timeout = 10, user, ip, tenantScope }) {
+  ensureRole(user, ROLES.ADMIN, 'docker.container.restart', id);
   const safeTimeout = Math.min(Math.max(1, Number(timeout) || 10), 60);
-  logger.info('docker.restartContainer', { containerId: normalizedId, userId: user?.id, timeout: safeTimeout });
 
   let container = null;
 
   try {
-    container = await withTimeout(resolveAllowedContainer(normalizedId), DOCKER_TIMEOUT_MS);
-    await withTimeout(dockerIntegration.restartContainer(normalizedId, { timeout: safeTimeout }), DOCKER_TIMEOUT_MS);
+    container = await withTimeout(resolveContainer(id, { user, tenantScope }), DOCKER_TIMEOUT_MS);
+    await withTimeout(dockerIntegration.restartContainer(id, { timeout: safeTimeout }), DOCKER_TIMEOUT_MS);
 
-    logger.info('Container restarted successfully', { containerId: normalizedId, userId: user?.id });
     await logAction(getAuditContext({
       user,
       container,
@@ -449,7 +499,7 @@ async function restartContainer({ id, timeout = 10, user, ip }) {
   } catch (err) {
     await logAction(getAuditContext({
       user,
-      container: container || { fullId: normalizedId, name: normalizedId },
+      container: container || { fullId: id, name: id },
       action: 'docker.container.restart',
       ip,
       status: 'failure',
@@ -459,18 +509,15 @@ async function restartContainer({ id, timeout = 10, user, ip }) {
   }
 }
 
-async function getContainerLogs({ id, tail = 100, timestamps = false, user, ip }) {
-  const normalizedId = validateId(id);
-  ensureRole(user, ROLES.OPERATOR, 'docker.container.logs', normalizedId);
-
+async function getContainerLogs({ id, tail = 100, timestamps = false, user, ip, tenantScope }) {
+  ensureRole(user, ROLES.OPERATOR, 'docker.container.logs', id);
   const safeTail = Math.min(Math.max(1, Number(tail) || 100), MAX_LOG_TAIL);
-  logger.info('docker.getContainerLogs', { containerId: normalizedId, userId: user?.id, tail: safeTail });
 
   let container = null;
 
   try {
-    container = await withTimeout(resolveAllowedContainer(normalizedId), DOCKER_TIMEOUT_MS);
-    const logs = await withTimeout(dockerIntegration.getContainerLogs(normalizedId, {
+    container = await withTimeout(resolveContainer(id, { user, tenantScope }), DOCKER_TIMEOUT_MS);
+    const logs = await withTimeout(dockerIntegration.getContainerLogs(id, {
       tail: safeTail,
       timestamps: timestamps === true || timestamps === 'true',
     }), DOCKER_TIMEOUT_MS);
@@ -487,7 +534,7 @@ async function getContainerLogs({ id, tail = 100, timestamps = false, user, ip }
   } catch (err) {
     await logAction(getAuditContext({
       user,
-      container: container || { fullId: normalizedId, name: normalizedId },
+      container: container || { fullId: id, name: id },
       action: 'docker.container.logs',
       ip,
       status: 'failure',

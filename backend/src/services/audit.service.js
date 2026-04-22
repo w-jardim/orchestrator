@@ -4,6 +4,7 @@ const { getDatabase } = require('../config/database');
 const logger = require('@plagard/core/src/logger');
 
 async function logAction({
+  tenantId = null,
   userId = null,
   role = null,
   action,
@@ -19,6 +20,7 @@ async function logAction({
     const createdAt = timestamp ? new Date(timestamp) : new Date();
 
     await db('audit_logs').insert({
+      tenant_id: tenantId,
       user_id: userId,
       role,
       action,
@@ -32,11 +34,12 @@ async function logAction({
   } catch (err) {
     logger.error('Failed to write audit log', {
       error: err.message,
+      tenantId,
+      userId,
+      role,
       action,
       resource,
       container,
-      userId,
-      role,
     });
   }
 }
