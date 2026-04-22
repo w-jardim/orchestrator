@@ -2,21 +2,23 @@
 
 const { Router } = require('express');
 const { param, query, body } = require('express-validator');
+const { ROLES } = require('@plagard/core/src/policies');
 const controller = require('../controllers/docker.controller');
-const { authenticate, authorize } = require('../middlewares/auth.middleware');
+const { authenticate } = require('../middlewares/auth.middleware');
+const { requireRole } = require('../middlewares/rbac');
+const createDockerRateLimiter = require('../middlewares/rateLimit');
+const validate = require('../middlewares/validate');
 
 const router = Router();
 
-// Todas as rotas Docker exigem autenticação
 router.use(authenticate);
-
-// ─── VALIDADORES ──────────────────────────────────────────────────────────────
+router.use(createDockerRateLimiter());
 
 const validateId = [
   param('id')
     .trim()
-    .matches(/^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}$/)
-    .withMessage('ID de container inválido: use apenas letras, números, underscores, pontos e hifens'),
+    .matches(/^(?:[a-f0-9]{12}|[a-f0-9]{64}|[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127})$/)
+    .withMessage('ID de container invalido: use ID Docker hex ou nome seguro'),
 ];
 
 const validateLogsQuery = [
@@ -44,22 +46,11 @@ const validateListQuery = [
     .withMessage('all deve ser true ou false'),
 ];
 
-// ─── ROTAS SOMENTE LEITURA (VIEWER+) ─────────────────────────────────────────
-
-router.get('/', authorize('VIEWER'), validateListQuery, controller.list);
-
-router.get('/:id', authorize('VIEWER'), validateId, controller.inspect);
-
-// ─── LOGS (OPERATOR+ por expor dados sensíveis de execução) ───────────────────
-
-router.get('/:id/logs', authorize('OPERATOR'), [...validateId, ...validateLogsQuery], controller.logs);
-
-// ─── AÇÕES MUTANTES (OPERATOR+) ───────────────────────────────────────────────
-
-router.post('/:id/start', authorize('OPERATOR'), [...validateId, ...validateTimeout], controller.start);
-
-router.post('/:id/stop', authorize('OPERATOR'), [...validateId, ...validateTimeout], controller.stop);
-
-router.post('/:id/restart', authorize('OPERATOR'), [...validateId, ...validateTimeout], controller.restart);
+router.get('/', requireRole(ROLES.VIEWER), validateListQuery, validate, controller.list);
+router.get('/:id', requireRole(ROLES.VIEWER), validateId, validate, controller.inspect);
+router.get('/:id/logs', requireRole(ROLES.OPERATOR), [...validateId, ...validateLogsQuery], validate, controller.logs);
+router.post('/:id/start', requireRole(ROLES.ADMIN), [...validateId, ...validateTimeout], validate, controller.start);
+router.post('/:id/stop', requireRole(ROLES.ADMIN), [...validateId, ...validateTimeout], validate, controller.stop);
+router.post('/:id/restart', requireRole(ROLES.ADMIN), [...validateId, ...validateTimeout], validate, controller.restart);
 
 module.exports = router;

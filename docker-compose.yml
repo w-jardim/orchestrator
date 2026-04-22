@@ -3,8 +3,8 @@ services:
     image: plagard-backend-test
     container_name: plagard-backend
     restart: unless-stopped
-    user: "0:0"
-    privileged: true
+    group_add:
+      - "${DOCKER_GID:-998}"
     ports:
       - "${PORT:-3000}:3000"
     env_file:

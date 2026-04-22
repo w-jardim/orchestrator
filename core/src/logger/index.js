@@ -29,4 +29,9 @@ const logger = winston.createLogger({
   exitOnError: false,
 });
 
+// Audit helper: structured audit log
+logger.audit = function audit(message, meta = {}) {
+  this.info(message, Object.assign({ audit: true }, meta));
+};
+
 module.exports = logger;

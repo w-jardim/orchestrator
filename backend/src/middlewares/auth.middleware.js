@@ -5,24 +5,28 @@ const { hasMinimumRole } = require('@plagard/core/src/policies');
 const logger = require('@plagard/core/src/logger');
 
 function authenticate(req, res, next) {
-  const authHeader = req.headers['authorization'];
+  const authHeader = req.headers.authorization;
+
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({
       success: false,
-      error: 'Token de autenticação ausente',
+      error: 'Token de autenticacao ausente',
     });
   }
 
   const token = authHeader.slice(7);
+
   try {
     const payload = verifyAccessToken(token);
     req.user = payload;
     return next();
   } catch (err) {
     logger.warn('Invalid access token', { error: err.message, ip: req.ip });
+
     const message = err.name === 'TokenExpiredError'
       ? 'Token expirado'
-      : 'Token inválido';
+      : 'Token invalido';
+
     return res.status(401).json({ success: false, error: message });
   }
 }
@@ -30,8 +34,9 @@ function authenticate(req, res, next) {
 function authorize(requiredRole) {
   return (req, res, next) => {
     if (!req.user) {
-      return res.status(401).json({ success: false, error: 'Não autenticado' });
+      return res.status(401).json({ success: false, error: 'Nao autenticado' });
     }
+
     if (!hasMinimumRole(req.user.role, requiredRole)) {
       logger.warn('Unauthorized access attempt', {
         userId: req.user.id,
@@ -39,8 +44,14 @@ function authorize(requiredRole) {
         requiredRole,
         path: req.path,
       });
-      return res.status(403).json({ success: false, error: 'Acesso negado' });
+
+      return res.status(403).json({
+        success: false,
+        error: 'Acesso negado',
+        code: 'FORBIDDEN',
+      });
     }
+
     return next();
   };
 }

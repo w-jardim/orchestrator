@@ -7,16 +7,27 @@ const ROLES = {
   VIEWER: 'VIEWER',
 };
 
-const ROLE_HIERARCHY = {
-  [ROLES.ADMIN_MASTER]: 4,
-  [ROLES.ADMIN]: 3,
-  [ROLES.OPERATOR]: 2,
-  [ROLES.VIEWER]: 1,
-};
+const ROLE_ORDER = [
+  ROLES.VIEWER,
+  ROLES.OPERATOR,
+  ROLES.ADMIN,
+  ROLES.ADMIN_MASTER,
+];
+
+const ROLE_HIERARCHY = Object.freeze(
+  ROLE_ORDER.reduce((acc, role, index) => {
+    acc[role] = index + 1;
+    return acc;
+  }, {})
+);
+
+function normalizeRole(role) {
+  return typeof role === 'string' ? role.trim().toUpperCase() : '';
+}
 
 function hasMinimumRole(userRole, requiredRole) {
-  const userLevel = ROLE_HIERARCHY[userRole] ?? 0;
-  const requiredLevel = ROLE_HIERARCHY[requiredRole] ?? 99;
+  const userLevel = ROLE_HIERARCHY[normalizeRole(userRole)] ?? 0;
+  const requiredLevel = ROLE_HIERARCHY[normalizeRole(requiredRole)] ?? 99;
   return userLevel >= requiredLevel;
 }
 
@@ -35,4 +46,4 @@ const can = {
   manageSystem: requireRole(ROLES.ADMIN_MASTER),
 };
 
-module.exports = { ROLES, hasMinimumRole, requireRole, can };
+module.exports = { ROLES, ROLE_HIERARCHY, hasMinimumRole, requireRole, can };
