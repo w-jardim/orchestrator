@@ -1,5 +1,8 @@
 services:
   backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     image: plagard-backend-test
     container_name: plagard-backend
     restart: unless-stopped
@@ -25,9 +28,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
     image: plagard-worker-test
     container_name: plagard-worker
     restart: unless-stopped
+    user: root
     env_file:
       - .env
     environment:

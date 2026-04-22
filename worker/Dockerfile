@@ -5,11 +5,15 @@ WORKDIR /build
 
 COPY package.json ./
 COPY core/package.json ./core/
+COPY integrations/package.json ./integrations/
+COPY backend/package.json ./backend/
 COPY worker/package.json ./worker/
 
 RUN npm install --workspaces --include-workspace-root
 
 COPY core/ ./core/
+COPY integrations/ ./integrations/
+COPY backend/ ./backend/
 COPY worker/ ./worker/
 
 # ─── Production stage ─────────────────────────────────────────────────────────
@@ -23,6 +27,8 @@ WORKDIR /app
 
 COPY --from=builder /build/node_modules ./node_modules
 COPY --from=builder /build/core ./node_modules/@plagard/core
+COPY --from=builder /build/integrations ./node_modules/@plagard/integrations
+COPY --from=builder /build/backend ./node_modules/@plagard/backend
 COPY --from=builder /build/worker/src ./src
 COPY --from=builder /build/worker/package.json ./package.json
 

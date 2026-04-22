@@ -12,6 +12,19 @@ const QUEUES = {
 
 const _instances = new Map();
 
+function normalizeDeployPayload(data = {}) {
+  return {
+    deployId: Number(data.deployId),
+    name: String(data.name || '').trim(),
+    image: String(data.image || '').trim(),
+    ports: Array.isArray(data.ports) ? data.ports : [],
+    env: data.env && typeof data.env === 'object' && !Array.isArray(data.env) ? data.env : {},
+    user: data.user || null,
+    ip: data.ip ? String(data.ip) : null,
+    replaceExisting: data.replaceExisting === true,
+  };
+}
+
 function getQueue(name) {
   if (_instances.has(name)) return _instances.get(name);
 
@@ -41,4 +54,17 @@ async function addJob(queueName, jobName, data, opts = {}) {
   return job;
 }
 
-module.exports = { getQueue, addJob, QUEUES };
+async function enqueueDeploy(data, opts = {}) {
+  const payload = normalizeDeployPayload(data);
+
+  if (!payload.deployId || !payload.name || !payload.image) {
+    throw new Error('Invalid deploy payload');
+  }
+
+  return addJob(QUEUES.DEPLOY, 'deploy.run', payload, {
+    jobId: `deploy_${payload.deployId}`,
+    ...opts,
+  });
+}
+
+module.exports = { getQueue, addJob, enqueueDeploy, QUEUES };

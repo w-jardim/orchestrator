@@ -9,6 +9,7 @@ const { QUEUES } = require('@plagard/core/src/queue');
 const logger = require('@plagard/core/src/logger');
 logger.info('Resolved QUEUES at startup', { QUEUES });
 const { defaultProcessor } = require('./processors/default.processor');
+const { deployProcessor } = require('./processors/deploy.processor');
 
 const CONCURRENCY = Number(process.env.WORKER_CONCURRENCY) || 5;
 
@@ -52,7 +53,7 @@ async function bootstrap() {
 
   const workers = [
     createWorker(QUEUES.TASKS, defaultProcessor),
-    createWorker(QUEUES.DEPLOY, defaultProcessor),
+    createWorker(QUEUES.DEPLOY, deployProcessor),
   ];
 
   logger.info('Workers registered', {

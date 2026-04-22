@@ -8,7 +8,9 @@
     "dev": "nodemon src/index.js"
   },
   "dependencies": {
+    "@plagard/backend": "*",
     "@plagard/core": "*",
+    "@plagard/integrations": "*",
     "dotenv": "^16.4.4"
   },
   "devDependencies": {

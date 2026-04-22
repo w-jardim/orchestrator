@@ -12,15 +12,50 @@ function getDockerClient() {
   return _docker;
 }
 
-// ─── LIST ─────────────────────────────────────────────────────────────────────
+function buildPortConfig(ports = []) {
+  return ports.reduce((acc, entry) => {
+    const [hostPort, containerPort] = String(entry).split(':');
+    const key = `${containerPort}/tcp`;
+
+    acc.exposedPorts[key] = {};
+    acc.portBindings[key] = [{ HostPort: String(hostPort) }];
+    return acc;
+  }, { exposedPorts: {}, portBindings: {} });
+}
+
+function buildEnvArray(env = {}) {
+  return Object.entries(env).map(([key, value]) => `${key}=${value}`);
+}
+
+async function pullImage(image) {
+  const docker = getDockerClient();
+
+  const stream = await docker.pull(image);
+
+  await new Promise((resolve, reject) => {
+    docker.modem.followProgress(stream, (err, output) => {
+      if (err) return reject(err);
+      return resolve(output);
+    });
+  });
+}
+
+async function ensureImageAvailable(image) {
+  const docker = getDockerClient();
+
+  try {
+    await docker.getImage(image).inspect();
+  } catch (err) {
+    if (err?.statusCode !== 404) throw err;
+    await pullImage(image);
+  }
+}
 
 async function listContainers({ all = false } = {}) {
   const docker = getDockerClient();
   const raw = await docker.listContainers({ all });
   return raw.map(formatSummary);
 }
-
-// ─── INSPECT ──────────────────────────────────────────────────────────────────
 
 async function inspectContainer(id) {
   const docker = getDockerClient();
@@ -29,15 +64,11 @@ async function inspectContainer(id) {
   return formatDetail(raw);
 }
 
-// ─── START ────────────────────────────────────────────────────────────────────
-
 async function startContainer(id) {
   const docker = getDockerClient();
   const container = docker.getContainer(id);
   await container.start();
 }
-
-// ─── STOP ─────────────────────────────────────────────────────────────────────
 
 async function stopContainer(id, { timeout = 10 } = {}) {
   const docker = getDockerClient();
@@ -45,15 +76,39 @@ async function stopContainer(id, { timeout = 10 } = {}) {
   await container.stop({ t: Math.min(timeout, 60) });
 }
 
-// ─── RESTART ──────────────────────────────────────────────────────────────────
-
 async function restartContainer(id, { timeout = 10 } = {}) {
   const docker = getDockerClient();
   const container = docker.getContainer(id);
   await container.restart({ t: Math.min(timeout, 60) });
 }
 
-// ─── LOGS ─────────────────────────────────────────────────────────────────────
+async function removeContainer(id, { force = false } = {}) {
+  const docker = getDockerClient();
+  const container = docker.getContainer(id);
+  await container.remove({ force });
+}
+
+async function runContainer({ name, image, ports = [], env = {} } = {}) {
+  const docker = getDockerClient();
+  const { exposedPorts, portBindings } = buildPortConfig(ports);
+
+  await ensureImageAvailable(image);
+
+  const container = await docker.createContainer({
+    name,
+    Image: image,
+    Env: buildEnvArray(env),
+    ExposedPorts: exposedPorts,
+    HostConfig: {
+      PortBindings: portBindings,
+      RestartPolicy: { Name: 'unless-stopped' },
+    },
+  });
+
+  await container.start();
+  const raw = await container.inspect();
+  return formatDetail(raw);
+}
 
 async function getContainerLogs(id, { tail = 100, timestamps = false } = {}) {
   const docker = getDockerClient();
@@ -71,8 +126,6 @@ async function getContainerLogs(id, { tail = 100, timestamps = false } = {}) {
 
   return parseLogs(buffer);
 }
-
-// ─── FORMATTERS ───────────────────────────────────────────────────────────────
 
 function formatSummary(raw) {
   return {
@@ -118,7 +171,6 @@ function formatDetail(raw) {
     ports: raw.NetworkSettings?.Ports || {},
     networks: Object.keys(raw.NetworkSettings?.Networks || {}),
     env: (raw.Config?.Env || []).map((e) => {
-      // Mask sensitive env vars
       const [key] = e.split('=');
       if (/pass|secret|token|key|pwd/i.test(key)) return `${key}=***`;
       return e;
@@ -126,9 +178,6 @@ function formatDetail(raw) {
   };
 }
 
-// Docker multiplexes stdout/stderr into a framed stream (non-TTY containers).
-// Each frame: [stream_type(1B), 0,0,0(3B), payload_size_BE(4B), payload...]
-// stream_type: 1=stdout, 2=stderr. TTY containers emit raw bytes (no frames).
 function parseLogs(buffer) {
   if (!Buffer.isBuffer(buffer)) {
     const text = String(buffer);
@@ -137,7 +186,6 @@ function parseLogs(buffer) {
 
   if (buffer.length === 0) return [];
 
-  // Detect multiplexed format: first byte must be 1 or 2, bytes 1-3 must be 0
   const isMuxed =
     (buffer[0] === 1 || buffer[0] === 2) &&
     buffer[1] === 0 && buffer[2] === 0 && buffer[3] === 0;
@@ -176,5 +224,7 @@ module.exports = {
   startContainer,
   stopContainer,
   restartContainer,
+  removeContainer,
+  runContainer,
   getContainerLogs,
 };
