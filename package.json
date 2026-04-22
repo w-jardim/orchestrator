@@ -1,0 +1,21 @@
+{
+  "name": "plagard-orchestrator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Plataforma de orquestração de infraestrutura e SaaS",
+  "workspaces": [
+    "core",
+    "backend",
+    "worker"
+  ],
+  "scripts": {
+    "dev:backend": "npm --workspace=backend run dev",
+    "dev:worker": "npm --workspace=worker run dev",
+    "start:backend": "npm --workspace=backend run start",
+    "start:worker": "npm --workspace=worker run start"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@plagard/worker",
+  "version": "1.0.0",
+  "description": "Executor assíncrono de tarefas do Plagard Orchestrator",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "@plagard/core": "*",
+    "dotenv": "^16.4.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

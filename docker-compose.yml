@@ -1,0 +1,90 @@
+services:
+  backend:
+    image: plagard-backend-test
+    container_name: plagard-backend
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file:
+      - .env
+    environment:
+      DB_HOST: mysql
+      REDIS_HOST: redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - plagard-net
+    volumes:
+      - ./backend/src:/app/src:ro
+      - ./core:/app/node_modules/@plagard/core:ro
+
+  worker:
+    image: plagard-worker-test
+    container_name: plagard-worker
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DB_HOST: mysql
+      REDIS_HOST: redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - plagard-net
+    volumes:
+      - ./worker/src:/app/src:ro
+      - ./core:/app/node_modules/@plagard/core:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  mysql:
+    image: mysql:8.0
+    container_name: plagard-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS:-root_secret}
+      MYSQL_DATABASE: ${DB_NAME:-plagard_orchestrator}
+      MYSQL_USER: ${DB_USER:-orchestrator}
+      MYSQL_PASSWORD: ${DB_PASS:-orchestrator_pass}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./database/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASS:-root_secret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - plagard-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: plagard-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - plagard-net
+
+networks:
+  plagard-net:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:
