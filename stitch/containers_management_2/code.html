@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111317;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333539;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #424754;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#93000a",
+                        "tertiary": "#ffb786",
+                        "error": "#ffb4ab",
+                        "primary-fixed-dim": "#adc6ff",
+                        "surface-container-highest": "#333539",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-lowest": "#0c0e12",
+                        "on-surface-variant": "#c2c6d6",
+                        "outline": "#8c909f",
+                        "inverse-on-surface": "#2f3035",
+                        "background": "#111317",
+                        "on-surface": "#e2e2e8",
+                        "primary-container": "#4d8eff",
+                        "on-secondary-fixed": "#002113",
+                        "surface-dim": "#111317",
+                        "primary": "#adc6ff",
+                        "inverse-surface": "#e2e2e8",
+                        "primary-fixed": "#d8e2ff",
+                        "surface-bright": "#37393e",
+                        "on-background": "#e2e2e8",
+                        "tertiary-container": "#df7412",
+                        "on-secondary-fixed-variant": "#005236",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-tertiary-fixed": "#311400",
+                        "outline-variant": "#424754",
+                        "secondary": "#4edea3",
+                        "on-primary-container": "#00285d",
+                        "on-secondary-container": "#00311f",
+                        "on-primary": "#002e6a",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-tertiary": "#502400",
+                        "on-error": "#690005",
+                        "surface-variant": "#333539",
+                        "on-secondary": "#003824",
+                        "surface-container-low": "#1a1c20",
+                        "inverse-primary": "#005ac2",
+                        "tertiary-fixed": "#ffdcc6",
+                        "surface-tint": "#adc6ff",
+                        "surface-container-high": "#282a2e",
+                        "on-primary-fixed": "#001a42",
+                        "secondary-container": "#00a572",
+                        "surface-container": "#1e2024"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "body-base": ["Inter"],
+                        "label-caps": ["Space Grotesk"],
+                        "mono-code": ["JetBrains Mono"],
+                        "h1": ["Inter"],
+                        "h2": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-base": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "mono-code": ["13px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "h1": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "h2": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-sm": ["12px", {"lineHeight": "1.4", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-base antialiased selection:bg-primary/30 selection:text-primary-fixed">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen w-64 border-r bg-slate-900 border-slate-800 font-inter antialiased tracking-tight flex flex-col py-6 z-50">
+<div class="px-6 mb-8">
+<img alt="Plagard Orchestrator Logo" class="h-8 w-auto filter brightness-0 invert opacity-90" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAk2GzBBA3wtYkfoRhUfw0MfQQj4E8bVUWo9dtKsl4aV8PvcVyl__4e5b4PArk7ECfkKTSYf0gFB5M-caKtnfonXXGgCOB0fyB4W4QOhFBVB_1gyYLW8Pku03EnTCpo2ut1pH3i1okW2x7DpjcSlQV0qBLJltwHBSYC9y-XkRywOxHznt2SH10zhscmgs7uLWG99FBKNMylcMWWnWG3wD5GOE9_H_pZXQdzSlxlGu0lBEn1k7iPZE09FkJkf_aDM-yUDwlubzBx9H1A"/>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-slate-400 hover:bg-slate-800 hover:text-white transition-colors duration-200 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-body-base">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-blue-400 bg-slate-800/50 border-r-2 border-blue-500 font-medium active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="view_list">view_list</span>
+<span class="text-body-base">Containers</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-slate-400 hover:bg-slate-800 hover:text-white transition-colors duration-200 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="text-body-base">Logs</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-slate-400 hover:bg-slate-800 hover:text-white transition-colors duration-200 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-body-base">Settings</span>
+</a>
+</nav>
+<div class="px-4 mt-auto pt-6 border-t border-slate-800">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-slate-400 hover:bg-slate-800 hover:text-white transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="text-body-base">Documentation</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-slate-400 hover:bg-slate-800 hover:text-white transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="text-body-base">Support</span>
+</a>
+</div>
+</aside>
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] border-b border-slate-800 bg-slate-900/80 backdrop-blur-md flex justify-between items-center h-16 px-8 z-40">
+<div class="flex items-center gap-6 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">search</span>
+<input class="w-full bg-slate-950/50 border border-slate-800 rounded px-10 py-1.5 text-sm focus:outline-none focus:border-blue-500 transition-colors text-on-surface" placeholder="Search system resources..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-label-caps text-slate-500">SYSTEM HEALTH</span>
+<div class="flex items-center gap-1.5 px-2 py-1 bg-secondary/10 border border-secondary/20 rounded">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></div>
+<span class="text-[10px] text-secondary font-bold uppercase tracking-wider">Optimal</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary text-on-primary-container px-4 py-2 rounded font-label-caps text-[12px] hover:brightness-110 active:scale-95 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add_box</span>
+                Deploy New
+            </button>
+<div class="h-6 w-px bg-slate-800 mx-2"></div>
+<div class="flex items-center gap-4 text-slate-400">
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors" data-icon="settings_input_component">settings_input_component</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors" data-icon="dns">dns</span>
+</div>
+<img alt="User Avatar" class="w-8 h-8 rounded-full border border-slate-700 bg-slate-800" data-alt="close up professional profile avatar of a software engineer in technical minimalist lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkYBuNSxIjWj9UiLWI1niqfMbHt7tRrS58A2yT8FSfT2i5lLPDXPLlB-Pajq6Ejwbe6b3Mk0dXPC09SvG8qiQerdJEuisrR6z2-Ki22EJc18ZI5FNZp2DTnZ_73FQNdPaXUof2VLCQLDnJ4GgfoeptK59Izfva6eOSxrkS2MEHr6F2wkHTGr08w9cwkbvQM9_W_xCnMeQ6NTIVyK_qvWtHKHm91hNyf_Kgj1i6DfMIRjEM913T8_qQuOtjt3hFfu4E5dltaxxwymIq"/>
+</div>
+</header>
+<!-- Main Content -->
+<main class="pl-64 pt-16 min-h-screen">
+<div class="p-8 max-w-7xl mx-auto">
+<!-- Dashboard Header Section -->
+<div class="flex items-end justify-between mb-8">
+<div>
+<h2 class="text-h2 font-h2 text-on-surface mb-1">Containers Management</h2>
+<p class="text-on-surface-variant text-body-base">Orchestrate and monitor your running microservices across cluster nodes.</p>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex rounded border border-slate-800 overflow-hidden">
+<button class="px-3 py-1.5 bg-slate-800 text-white text-body-sm font-medium">All Instances</button>
+<button class="px-3 py-1.5 bg-slate-900 text-slate-400 hover:text-white text-body-sm transition-colors border-l border-slate-800">Production</button>
+<button class="px-3 py-1.5 bg-slate-900 text-slate-400 hover:text-white text-body-sm transition-colors border-l border-slate-800">Staging</button>
+</div>
+<button class="p-2 bg-slate-900 border border-slate-800 rounded text-slate-400 hover:text-white hover:border-slate-700 transition-all">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+</div>
+<!-- Stats Overview - Bento Grid Style -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+<div class="bg-surface-container border border-outline-variant p-4 rounded-lg flex flex-col gap-2">
+<span class="text-label-caps text-slate-500">TOTAL CONTAINERS</span>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-bold text-white">42</span>
+<span class="text-secondary text-[11px] font-bold">+3 today</span>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4 rounded-lg flex flex-col gap-2">
+<span class="text-label-caps text-slate-500">ACTIVE NODES</span>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-bold text-white">08</span>
+<span class="text-on-surface-variant text-[11px]">100% Health</span>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4 rounded-lg flex flex-col gap-2">
+<span class="text-label-caps text-slate-500">CPU UTILIZATION</span>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-bold text-white">24.2%</span>
+<div class="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[24.2%]"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-4 rounded-lg flex flex-col gap-2">
+<span class="text-label-caps text-slate-500">NETWORK THROUGHPUT</span>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-bold text-white">1.2<span class="text-lg font-medium text-slate-500">GB/s</span></span>
+</div>
+</div>
+</div>
+<!-- Technical Data Table -->
+<div class="bg-surface-container border border-outline-variant rounded-lg overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-900/50 border-b border-outline-variant">
+<th class="px-6 py-4 text-label-caps text-slate-500 uppercase">Container Name</th>
+<th class="px-6 py-4 text-label-caps text-slate-500 uppercase">Status</th>
+<th class="px-6 py-4 text-label-caps text-slate-500 uppercase">Port</th>
+<th class="px-6 py-4 text-label-caps text-slate-500 uppercase">Uptime</th>
+<th class="px-6 py-4 text-label-caps text-slate-500 uppercase text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-800/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[20px]">deployed_code</span>
+<div>
+<div class="font-mono-code text-on-surface font-medium">api-gateway</div>
+<div class="text-[10px] text-slate-500 uppercase tracking-tighter">v2.4.1-stable</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-secondary/30 bg-secondary/10 text-[11px] font-bold text-secondary uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                                    Running
+                                </span>
+</td>
+<td class="px-6 py-4">
+<code class="font-mono-code text-blue-400 bg-blue-500/5 px-2 py-1 rounded border border-blue-500/20 text-xs">8080:80</code>
+</td>
+<td class="px-6 py-4">
+<span class="text-body-sm text-on-surface-variant">4 days 12h 04m</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-end gap-2">
+<button class="p-1.5 text-slate-400 hover:text-primary transition-colors rounded hover:bg-slate-700" title="Restart">
+<span class="material-symbols-outlined text-[18px]">restart_alt</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-error transition-colors rounded hover:bg-slate-700" title="Stop">
+<span class="material-symbols-outlined text-[18px]">stop_circle</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-white transition-colors rounded hover:bg-slate-700" title="Logs">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-800/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[20px]">deployed_code</span>
+<div>
+<div class="font-mono-code text-on-surface font-medium">worker-node-1</div>
+<div class="text-[10px] text-slate-500 uppercase tracking-tighter">v1.1.0-beta</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-error/30 bg-error/10 text-[11px] font-bold text-error uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                                    Stopped
+                                </span>
+</td>
+<td class="px-6 py-4">
+<span class="text-slate-600 font-mono-code">-</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-body-sm text-slate-500">0s</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-end gap-2">
+<button class="p-1.5 text-slate-400 hover:text-secondary transition-colors rounded hover:bg-slate-700" title="Start">
+<span class="material-symbols-outlined text-[18px]">play_circle</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-white transition-colors rounded hover:bg-slate-700" title="Logs">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-800/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[20px]">deployed_code</span>
+<div>
+<div class="font-mono-code text-on-surface font-medium">auth-service</div>
+<div class="text-[10px] text-slate-500 uppercase tracking-tighter">v2.0.0-rc</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-secondary/30 bg-secondary/10 text-[11px] font-bold text-secondary uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                                    Running
+                                </span>
+</td>
+<td class="px-6 py-4">
+<code class="font-mono-code text-blue-400 bg-blue-500/5 px-2 py-1 rounded border border-blue-500/20 text-xs">5000:5000</code>
+</td>
+<td class="px-6 py-4">
+<span class="text-body-sm text-on-surface-variant">12 days 01h 32m</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-end gap-2">
+<button class="p-1.5 text-slate-400 hover:text-primary transition-colors rounded hover:bg-slate-700" title="Restart">
+<span class="material-symbols-outlined text-[18px]">restart_alt</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-error transition-colors rounded hover:bg-slate-700" title="Stop">
+<span class="material-symbols-outlined text-[18px]">stop_circle</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-white transition-colors rounded hover:bg-slate-700" title="Logs">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-slate-800/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary text-[20px]">deployed_code</span>
+<div>
+<div class="font-mono-code text-on-surface font-medium">redis-cache</div>
+<div class="text-[10px] text-slate-500 uppercase tracking-tighter">v6.2.6-alpine</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-tertiary/30 bg-tertiary/10 text-[11px] font-bold text-tertiary uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                                    Degraded
+                                </span>
+</td>
+<td class="px-6 py-4">
+<code class="font-mono-code text-blue-400 bg-blue-500/5 px-2 py-1 rounded border border-blue-500/20 text-xs">6379:6379</code>
+</td>
+<td class="px-6 py-4">
+<span class="text-body-sm text-on-surface-variant">22h 45m</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-end gap-2">
+<button class="p-1.5 text-slate-400 hover:text-primary transition-colors rounded hover:bg-slate-700" title="Restart">
+<span class="material-symbols-outlined text-[18px]">restart_alt</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-error transition-colors rounded hover:bg-slate-700" title="Stop">
+<span class="material-symbols-outlined text-[18px]">stop_circle</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-white transition-colors rounded hover:bg-slate-700" title="Logs">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="px-6 py-4 border-t border-outline-variant bg-slate-900/30 flex items-center justify-between">
+<span class="text-body-sm text-slate-500">Showing 4 of 42 running instances</span>
+<div class="flex items-center gap-2">
+<button class="p-1.5 rounded border border-slate-800 text-slate-500 hover:text-white disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<span class="text-body-sm font-medium px-2">1</span>
+<button class="p-1.5 rounded border border-slate-800 text-slate-500 hover:text-white">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Terminal Widget -->
+<div class="mt-8">
+<div class="flex items-center justify-between mb-2">
+<h3 class="text-label-caps text-slate-500">GLOBAL CLUSTER LOGS</h3>
+<button class="text-[10px] text-primary hover:underline uppercase tracking-widest font-bold">Popout Console</button>
+</div>
+<div class="bg-black border border-slate-800 rounded font-mono-code text-[12px] p-4 h-48 overflow-y-auto">
+<div class="flex gap-4">
+<span class="text-slate-600">[2023-10-27 14:22:01]</span>
+<span class="text-secondary">[INFO]</span>
+<span class="text-slate-300">Cluster node-04 initialized successfully.</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600">[2023-10-27 14:22:05]</span>
+<span class="text-primary">[MONITOR]</span>
+<span class="text-slate-300">Scaling policy triggered for 'api-gateway'. New instance spawning...</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600">[2023-10-27 14:22:12]</span>
+<span class="text-tertiary">[WARN]</span>
+<span class="text-slate-300">High memory pressure detected on worker-node-1. Attempting GC.</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600">[2023-10-27 14:23:45]</span>
+<span class="text-secondary">[INFO]</span>
+<span class="text-white">root@plagard:~$</span>
+<span class="text-white">orchestrator status --all</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600">[2023-10-27 14:23:46]</span>
+<span class="text-secondary">[INFO]</span>
+<span class="text-slate-300">Querying cluster state...</span>
+</div>
+<div class="flex gap-1 mt-1">
+<span class="text-white font-bold inline-block w-2 h-4 bg-white/80 animate-pulse"></span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

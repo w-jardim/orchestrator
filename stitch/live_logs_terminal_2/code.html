@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Plagard Orchestrator - Logs</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        /* Authentic Terminal Cursor */
+        .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.2em;
+            background-color: #ffffff;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+        /* Custom scrollbar for terminal */
+        .terminal-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .terminal-scroll::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: #1F2937;
+            border-radius: 4px;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "error-container": "#93000a",
+                    "tertiary": "#ffb786",
+                    "error": "#ffb4ab",
+                    "primary-fixed-dim": "#adc6ff",
+                    "surface-container-highest": "#333539",
+                    "tertiary-fixed-dim": "#ffb786",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-lowest": "#0c0e12",
+                    "on-surface-variant": "#c2c6d6",
+                    "outline": "#8c909f",
+                    "inverse-on-surface": "#2f3035",
+                    "background": "#111317",
+                    "on-surface": "#e2e2e8",
+                    "primary-container": "#4d8eff",
+                    "on-secondary-fixed": "#002113",
+                    "surface-dim": "#111317",
+                    "primary": "#adc6ff",
+                    "inverse-surface": "#e2e2e8",
+                    "primary-fixed": "#d8e2ff",
+                    "surface-bright": "#37393e",
+                    "on-background": "#e2e2e8",
+                    "tertiary-container": "#df7412",
+                    "on-secondary-fixed-variant": "#005236",
+                    "secondary-fixed-dim": "#4edea3",
+                    "on-tertiary-fixed": "#311400",
+                    "outline-variant": "#424754",
+                    "secondary": "#4edea3",
+                    "on-primary-container": "#00285d",
+                    "on-secondary-container": "#00311f",
+                    "on-primary": "#002e6a",
+                    "secondary-fixed": "#6ffbbe",
+                    "on-tertiary": "#502400",
+                    "on-error": "#690005",
+                    "surface-variant": "#333539",
+                    "on-tertiary": "#502400",
+                    "surface": "#111317",
+                    "on-tertiary-container": "#461f00",
+                    "on-primary-fixed-variant": "#004395",
+                    "on-secondary": "#003824",
+                    "surface-container-low": "#1a1c20",
+                    "inverse-primary": "#005ac2",
+                    "tertiary-fixed": "#ffdcc6",
+                    "surface-tint": "#adc6ff",
+                    "surface-container-high": "#282a2e",
+                    "on-primary-fixed": "#001a42",
+                    "secondary-container": "#00a572",
+                    "surface-container": "#1e2024"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "body-base": ["Inter"],
+                    "label-caps": ["Space Grotesk"],
+                    "mono-code": ["JetBrains Mono"],
+                    "h1": ["Inter"],
+                    "h2": ["Inter"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "body-base": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "mono-code": ["13px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "h1": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "h2": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-sm": ["12px", {"lineHeight": "1.4", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-base overflow-hidden">
+<!-- SideNavBar (Authority Source: JSON) -->
+<aside class="fixed left-0 top-0 h-screen w-64 border-r border-slate-800 bg-slate-900 font-inter antialiased tracking-tight flex flex-col py-6 z-50">
+<div class="px-6 mb-8">
+<img alt="Plagard Orchestrator Logo" class="h-8 w-auto invert brightness-0 invert" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAk2GzBBA3wtYkfoRhUfw0MfQQj4E8bVUWo9dtKsl4aV8PvcVyl__4e5b4PArk7ECfkKTSYf0gFB5M-caKtnfonXXGgCOB0fyB4W4QOhFBVB_1gyYLW8Pku03EnTCpo2ut1pH3i1okW2x7DpjcSlQV0qBLJltwHBSYC9y-XkRywOxHznt2SH10zhscmgs7uLWG99FBKNMylcMWWnWG3wD5GOE9_H_pZXQdzSlxlGu0lBEn1k7iPZE09FkJkf_aDM-yUDwlubzBx9H1A" style="filter: brightness(0) invert(1);"/>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors duration-200 rounded active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors duration-200 rounded active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">view_list</span>
+<span>Containers</span>
+</a>
+<!-- Active State: Logs -->
+<a class="flex items-center gap-3 px-4 py-2 text-blue-400 bg-slate-800/50 border-r-2 border-blue-500 transition-colors duration-200 rounded active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span>Logs</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors duration-200 rounded active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="px-4 mt-auto space-y-1">
+<div class="px-4 py-4 mb-4 bg-slate-800/30 rounded-xl border border-slate-800">
+<button class="w-full py-2 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded text-sm transition-all active:scale-95">
+                    Deploy New
+                </button>
+</div>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors duration-200 rounded" href="#">
+<span class="material-symbols-outlined">description</span>
+<span>Documentation</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors duration-200 rounded" href="#">
+<span class="material-symbols-outlined">help</span>
+<span>Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 h-screen flex flex-col relative">
+<!-- TopAppBar (Authority Source: JSON) -->
+<header class="flex justify-between items-center h-16 px-8 z-40 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 font-inter text-sm font-medium">
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+<span class="material-symbols-outlined text-[18px]">search</span>
+</span>
+<input class="bg-slate-800/50 border-none rounded-lg pl-10 pr-4 py-1.5 text-sm w-64 focus:ring-1 focus:ring-blue-500 transition-all text-slate-200 placeholder-slate-500" placeholder="Search logs..." type="text"/>
+</div>
+<div class="h-4 w-px bg-slate-700"></div>
+<div class="flex items-center gap-2 text-blue-400">
+<span class="material-symbols-outlined text-[18px]">dns</span>
+<span class="font-mono-code text-xs uppercase tracking-tight">System Health</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<button class="text-slate-400 hover:text-white transition-colors cursor-pointer">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-slate-400 hover:text-white transition-colors cursor-pointer">
+<span class="material-symbols-outlined">settings_input_component</span>
+</button>
+</div>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-slate-700 ring-2 ring-slate-800/50">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="flat minimalist avatar of a software engineer with glasses and dark hair on a cool blue background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDML_L_qfS4MfjGtcn7JNUJZSOIAaXQDSxDT5CnOpe_Jc6PDso68KCLD0AxTMcVgaj6eA7kLjRDQ68cm6h-BSg_QN2jwLsumgyquJsUgdZvUNZMd18HW_YG4D9mN6Ql3-05lbU_BQpvIMH6YCS53eBw6KwSjqmHUtKFH3WuHLyaJ1JGeFKe32_OdZDr9a132ymjp5dzCn53wFHVxtD2iVK93B6qsqGCa_UbKf3TyGJdyrk2yfHHv92gGvjgy3rQ7A-iWZUm0Qo2EhbD"/>
+</div>
+</div>
+</header>
+<!-- Log Content Area -->
+<section class="flex-1 p-gutter overflow-hidden flex flex-col bg-background">
+<!-- Terminal Header / Toolbar -->
+<div class="bg-surface-container border border-outline-variant rounded-t-xl px-6 py-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-lg border border-white/5">
+<span class="flex h-2 w-2 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+</span>
+<span class="font-mono-code text-xs font-medium text-secondary">LIVE</span>
+</div>
+<div class="h-4 w-px bg-outline-variant"></div>
+<div class="flex flex-col">
+<span class="text-label-caps text-slate-500">CONTAINER CONTEXT</span>
+<h2 class="text-on-surface font-mono-code text-sm">Streaming logs for: <span class="text-primary">redis-cache</span></h2>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2 text-xs font-bold font-label-caps bg-surface-container-highest hover:bg-slate-700 text-on-surface border border-outline-variant rounded transition-all active:scale-95">
+<span class="material-symbols-outlined text-[16px]">download</span>
+                        DOWNLOAD LOGS
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 text-xs font-bold font-label-caps bg-error-container/20 hover:bg-error-container/40 text-error border border-error/20 rounded transition-all active:scale-95">
+<span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                        CLEAR
+                    </button>
+</div>
+</div>
+<!-- Terminal Component -->
+<div class="flex-1 bg-black border-x border-b border-outline-variant rounded-b-xl overflow-hidden flex flex-col font-mono-code shadow-2xl">
+<div class="terminal-scroll flex-1 overflow-y-auto p-6 space-y-1">
+<!-- Log Entries -->
+<div class="flex gap-4">
+<span class="text-slate-600 shrink-0 select-none">2023-11-24 14:22:01.442</span>
+<span class="text-secondary shrink-0 font-bold">[INFO]</span>
+<span class="text-slate-300">Redis version=7.2.3, bits=64, commit=00000000, modified=0, pid=1, just started</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600 shrink-0 select-none">2023-11-24 14:22:01.442</span>
+<span class="text-secondary shrink-0 font-bold">[INFO]</span>
+<span class="text-slate-300">Configuration loaded</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600 shrink-0 select-none">2023-11-24 14:22:01.443</span>
+<span class="text-tertiary shrink-0 font-bold">[WARN]</span>
+<span class="text-slate-300">The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600 shrink-0 select-none">2023-11-24 14:22:01.443</span>
+<span class="text-secondary shrink-0 font-bold">[INFO]</span>
+<span class="text-slate-300">Server initialized</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600 shrink-0 select-none">2023-11-24 14:22:01.444</span>
+<span class="text-secondary shrink-0 font-bold">[INFO]</span>
+<span class="text-slate-300">Loading RDB produced by version 7.2.3</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600 shrink-0 select-none">2023-11-24 14:22:01.444</span>
+<span class="text-secondary shrink-0 font-bold">[INFO]</span>
+<span class="text-slate-300">RDB age 442 seconds</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600 shrink-0 select-none">2023-11-24 14:22:01.444</span>
+<span class="text-secondary shrink-0 font-bold">[INFO]</span>
+<span class="text-slate-300">RDB memory usage when created 0.84 Mb</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600 shrink-0 select-none">2023-11-24 14:22:01.444</span>
+<span class="text-secondary shrink-0 font-bold">[INFO]</span>
+<span class="text-slate-300">Done loading RDB, keys loaded: 142, expires: 0</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600 shrink-0 select-none">2023-11-24 14:22:01.444</span>
+<span class="text-secondary shrink-0 font-bold">[INFO]</span>
+<span class="text-slate-300">Ready to accept connections tcp</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600 shrink-0 select-none">2023-11-24 14:25:32.112</span>
+<span class="text-secondary shrink-0 font-bold">[INFO]</span>
+<span class="text-slate-300">Accepted 127.0.0.1:54210</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600 shrink-0 select-none">2023-11-24 14:25:34.901</span>
+<span class="text-error shrink-0 font-bold">[ERRO]</span>
+<span class="text-slate-300">Protocol error from client: invalid bulk length at line 144</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600 shrink-0 select-none">2023-11-24 14:25:34.902</span>
+<span class="text-secondary shrink-0 font-bold">[INFO]</span>
+<span class="text-slate-300">Client 127.0.0.1:54210 disconnected</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600 shrink-0 select-none">2023-11-24 14:28:11.005</span>
+<span class="text-secondary shrink-0 font-bold">[INFO]</span>
+<span class="text-slate-300">10 changes in 300 seconds. Saving...</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600 shrink-0 select-none">2023-11-24 14:28:11.006</span>
+<span class="text-secondary shrink-0 font-bold">[INFO]</span>
+<span class="text-slate-300">Background saving started by pid 142</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600 shrink-0 select-none">2023-11-24 14:28:11.042</span>
+<span class="text-secondary shrink-0 font-bold">[INFO]</span>
+<span class="text-slate-300">DB saved on disk</span>
+</div>
+<div class="flex gap-4">
+<span class="text-slate-600 shrink-0 select-none">2023-11-24 14:28:11.043</span>
+<span class="text-secondary shrink-0 font-bold">[INFO]</span>
+<span class="text-slate-300">Background saving terminated with success</span>
+</div>
+<!-- Live Prompt -->
+<div class="flex gap-4 pt-4 border-t border-white/5">
+<span class="text-slate-600 shrink-0 select-none">2023-11-24 14:30:44.221</span>
+<span class="text-white shrink-0 font-bold">root@plagard:</span>
+<span class="text-slate-300">tail -f /var/log/redis-cache.log<span class="terminal-cursor"></span></span>
+</div>
+</div>
+<!-- Status Bar for Terminal -->
+<div class="bg-slate-900 border-t border-outline-variant px-6 py-2 flex items-center justify-between">
+<div class="flex gap-6">
+<div class="flex items-center gap-2">
+<span class="text-[10px] text-slate-500 font-label-caps">ENCODING</span>
+<span class="text-[10px] text-slate-300 font-mono-code uppercase">UTF-8</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] text-slate-500 font-label-caps">CONNECTION</span>
+<span class="text-[10px] text-secondary font-mono-code uppercase">ESTABLISHED</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-[10px] text-slate-500 font-mono-code uppercase">Line 1,422,901</span>
+<div class="flex items-center gap-1">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+<span class="text-[10px] text-slate-300 font-mono-code uppercase">Auto-scroll ON</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Context Footer / Quick Stats -->
+<div class="mt-4 grid grid-cols-4 gap-4">
+<div class="bg-surface-container p-4 rounded-lg border border-outline-variant">
+<p class="text-label-caps text-slate-500 mb-1">LOG VOLUME (1H)</p>
+<p class="text-h2 text-on-surface font-mono-code">42.8 <span class="text-sm font-normal text-slate-500">MB</span></p>
+</div>
+<div class="bg-surface-container p-4 rounded-lg border border-outline-variant">
+<p class="text-label-caps text-slate-500 mb-1">ERROR RATE</p>
+<p class="text-h2 text-error font-mono-code">0.04 <span class="text-sm font-normal text-slate-500">%</span></p>
+</div>
+<div class="bg-surface-container p-4 rounded-lg border border-outline-variant">
+<p class="text-label-caps text-slate-500 mb-1">ACTIVE SESSIONS</p>
+<p class="text-h2 text-on-surface font-mono-code">1,204</p>
+</div>
+<div class="bg-surface-container p-4 rounded-lg border border-outline-variant">
+<p class="text-label-caps text-slate-500 mb-1">UPTIME</p>
+<p class="text-h2 text-secondary font-mono-code">14d 2h</p>
+</div>
+</div>
+</section>
+</main>
+<!-- FAB Suppression: This is a task-focused screen (Logs), so FAB is suppressed as per the "Contextual FAB Suppression" rule. -->
+</body></html>

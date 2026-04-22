@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Plagard Orchestrator - Container Details</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111317;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333539;
+            border-radius: 3px;
+        }
+        .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background-color: #ffffff;
+            vertical-align: middle;
+            margin-left: 2px;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "error-container": "#93000a",
+                    "tertiary": "#ffb786",
+                    "error": "#ffb4ab",
+                    "primary-fixed-dim": "#adc6ff",
+                    "surface-container-highest": "#333539",
+                    "tertiary-fixed-dim": "#ffb786",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-lowest": "#0c0e12",
+                    "on-surface-variant": "#c2c6d6",
+                    "outline": "#8c909f",
+                    "inverse-on-surface": "#2f3035",
+                    "background": "#111317",
+                    "on-surface": "#e2e2e8",
+                    "primary-container": "#4d8eff",
+                    "on-secondary-fixed": "#002113",
+                    "surface-dim": "#111317",
+                    "primary": "#adc6ff",
+                    "inverse-surface": "#e2e2e8",
+                    "primary-fixed": "#d8e2ff",
+                    "surface-bright": "#37393e",
+                    "on-background": "#e2e2e8",
+                    "tertiary-container": "#df7412",
+                    "on-secondary-fixed-variant": "#005236",
+                    "secondary-fixed-dim": "#4edea3",
+                    "on-tertiary-fixed": "#311400",
+                    "outline-variant": "#424754",
+                    "secondary": "#4edea3",
+                    "on-primary-container": "#00285d",
+                    "on-secondary-container": "#00311f",
+                    "on-primary": "#002e6a",
+                    "secondary-fixed": "#6ffbbe",
+                    "on-tertiary": "#502400",
+                    "on-error": "#690005",
+                    "surface-variant": "#333539",
+                    "on-secondary": "#003824",
+                    "surface-container-low": "#1a1c20",
+                    "inverse-primary": "#005ac2",
+                    "tertiary-fixed": "#ffdcc6",
+                    "surface-tint": "#adc6ff",
+                    "surface-container-high": "#282a2e",
+                    "on-primary-fixed": "#001a42",
+                    "secondary-container": "#00a572",
+                    "surface-container": "#1e2024"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "gutter": "16px",
+                    "container-max": "1440px",
+                    "unit": "4px",
+                    "margin": "24px"
+            },
+            "fontFamily": {
+                    "body-base": ["Inter"],
+                    "label-caps": ["Space Grotesk"],
+                    "mono-code": ["JetBrains Mono"],
+                    "h1": ["Inter"],
+                    "h2": ["Inter"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "body-base": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "mono-code": ["13px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "h1": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "h2": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-sm": ["12px", {"lineHeight": "1.4", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-base antialiased">
+<!-- SideNavBar (Shared Component) -->
+<aside class="fixed left-0 top-0 h-screen w-64 border-r border-slate-800 bg-slate-900 flex flex-col py-6 z-50">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 bg-primary rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container text-xl" data-icon="dns">dns</span>
+</div>
+<div>
+<h1 class="text-xl font-bold text-white tracking-tighter">Plagard</h1>
+<p class="text-[10px] uppercase tracking-widest text-slate-500 font-label-caps">Orchestrator</p>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-base">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-blue-400 bg-slate-800/50 border-r-2 border-blue-500 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="view_list">view_list</span>
+<span class="font-body-base">Containers</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="font-body-base">Logs</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-base">Settings</span>
+</a>
+</nav>
+<div class="px-6 mb-4">
+<button class="w-full bg-primary-container text-on-primary-container py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                Deploy New
+            </button>
+</div>
+<div class="px-4 pt-4 border-t border-slate-800">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="text-body-sm">Documentation</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="text-body-sm">Support</span>
+</a>
+</div>
+</aside>
+<!-- TopAppBar (Shared Component) -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] border-b border-slate-800 bg-slate-900/80 backdrop-blur-md flex justify-between items-center h-16 px-8 z-40">
+<div class="flex items-center gap-4">
+<div class="flex items-center bg-surface-container-low px-3 py-1.5 rounded-lg border border-outline-variant w-96">
+<span class="material-symbols-outlined text-slate-500 mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none p-0 text-sm focus:ring-0 text-on-surface w-full" placeholder="Search systems..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-slate-400">
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors" data-icon="settings_input_component">settings_input_component</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors" data-icon="dns">dns</span>
+</div>
+<div class="h-8 w-px bg-slate-800"></div>
+<div class="flex items-center gap-3">
+<span class="text-xs font-medium text-slate-400 font-label-caps">SYS-HEALTH: 99.9%</span>
+<img alt="User Avatar" class="w-8 h-8 rounded-full border border-slate-700" data-alt="professional portrait of a software engineer with glasses in a minimalist dark studio setting with soft cyan backlighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdjYmDaSNyhpcc13fbbPx6sd8KOYJG4QpVSBhqMXTyqxvBvE_-UJIKO1K9TI6sx6zrRL1HmJ_AOuGtbOoiikavSJRrTsXl4nZaHA0yNbLN76p6zV1KWsBt_XpL-nC-WCqMmClilM98wU-nSVWmXSreGqhNFgy4FfSzHvL71yswS1DXAJPwoMUpB9g3SMZJDJIMxbzVLBTO8t-Zzi-cFr8Re_Sr9w0lA3rwDDApQY1ttCG3wMwV1HV_ITof1DFuUdMLLpFEoYowXbb1"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-64 pt-16 min-h-screen p-8">
+<!-- Header & Breadcrumbs -->
+<div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<nav class="flex items-center gap-2 text-slate-500 font-body-sm mb-2">
+<span>Containers</span>
+<span class="material-symbols-outlined text-xs" data-icon="chevron_right">chevron_right</span>
+<span class="text-primary">web-frontend</span>
+</nav>
+<div class="flex items-center gap-4">
+<h2 class="font-h1 text-on-surface">web-frontend</h2>
+<div class="px-2 py-0.5 rounded border border-secondary text-secondary bg-secondary/10 flex items-center gap-1.5 font-label-caps">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+                        Running
+                    </div>
+</div>
+</div>
+<!-- Action Bar -->
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant bg-surface-container-low hover:bg-surface-container transition-colors font-medium text-on-surface">
+<span class="material-symbols-outlined text-lg" data-icon="play_arrow">play_arrow</span>
+                    Start
+                </button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg border border-tertiary-container text-tertiary-container hover:bg-tertiary-container/10 transition-colors font-medium">
+<span class="material-symbols-outlined text-lg" data-icon="refresh">refresh</span>
+                    Restart
+                </button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg border border-error-container text-error bg-error-container/20 hover:bg-error-container/40 transition-colors font-medium">
+<span class="material-symbols-outlined text-lg" data-icon="stop">stop</span>
+                    Stop
+                </button>
+<button class="flex items-center justify-center w-10 h-10 rounded-lg bg-surface-container-highest text-white hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+</button>
+</div>
+</div>
+<!-- Metrics Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="bg-surface-container rounded-xl border border-outline-variant p-6 flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-slate-400 font-label-caps mb-1">CPU USAGE</p>
+<h3 class="font-h2 text-primary">12.4%</h3>
+</div>
+<span class="material-symbols-outlined text-slate-500" data-icon="memory">memory</span>
+</div>
+<div class="h-16 flex items-end gap-1">
+<div class="bg-primary/20 w-full h-8 rounded-sm"></div>
+<div class="bg-primary/20 w-full h-10 rounded-sm"></div>
+<div class="bg-primary/20 w-full h-12 rounded-sm"></div>
+<div class="bg-primary/40 w-full h-8 rounded-sm"></div>
+<div class="bg-primary/60 w-full h-14 rounded-sm"></div>
+<div class="bg-primary/80 w-full h-16 rounded-sm"></div>
+<div class="bg-primary w-full h-10 rounded-sm"></div>
+</div>
+</div>
+<div class="bg-surface-container rounded-xl border border-outline-variant p-6 flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-slate-400 font-label-caps mb-1">MEMORY</p>
+<h3 class="font-h2 text-secondary">256.8 MB</h3>
+</div>
+<span class="material-symbols-outlined text-slate-500" data-icon="database">database</span>
+</div>
+<div class="h-16 flex items-end gap-1">
+<div class="bg-secondary/20 w-full h-14 rounded-sm"></div>
+<div class="bg-secondary/40 w-full h-14 rounded-sm"></div>
+<div class="bg-secondary/40 w-full h-15 rounded-sm"></div>
+<div class="bg-secondary/60 w-full h-14 rounded-sm"></div>
+<div class="bg-secondary/80 w-full h-15 rounded-sm"></div>
+<div class="bg-secondary w-full h-15 rounded-sm"></div>
+<div class="bg-secondary w-full h-15 rounded-sm"></div>
+</div>
+</div>
+<div class="bg-surface-container rounded-xl border border-outline-variant p-6 flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-slate-400 font-label-caps mb-1">NETWORK (TX/RX)</p>
+<h3 class="font-h2 text-tertiary">4.2 KB/s</h3>
+</div>
+<span class="material-symbols-outlined text-slate-500" data-icon="swap_vert">swap_vert</span>
+</div>
+<div class="h-16 flex items-end gap-1">
+<div class="bg-tertiary/20 w-full h-6 rounded-sm"></div>
+<div class="bg-tertiary/20 w-full h-8 rounded-sm"></div>
+<div class="bg-tertiary/40 w-full h-4 rounded-sm"></div>
+<div class="bg-tertiary/60 w-full h-10 rounded-sm"></div>
+<div class="bg-tertiary/80 w-full h-12 rounded-sm"></div>
+<div class="bg-tertiary w-full h-7 rounded-sm"></div>
+<div class="bg-tertiary w-full h-9 rounded-sm"></div>
+</div>
+</div>
+</div>
+<!-- Information & Details -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+<div class="lg:col-span-2 space-y-8">
+<!-- Info Grid -->
+<div class="bg-surface-container rounded-xl border border-outline-variant overflow-hidden">
+<div class="px-6 py-4 border-b border-outline-variant bg-surface-container-low flex items-center justify-between">
+<span class="font-label-caps text-slate-300">CONFIGURATION DETAILS</span>
+<span class="material-symbols-outlined text-slate-500 text-sm" data-icon="info">info</span>
+</div>
+<div class="grid grid-cols-2 gap-px bg-outline-variant">
+<div class="bg-surface-container p-6">
+<p class="text-slate-500 font-label-caps text-[10px] mb-1">IMAGE NAME</p>
+<p class="font-mono-code text-on-surface">nginx:1.21-alpine</p>
+</div>
+<div class="bg-surface-container p-6">
+<p class="text-slate-500 font-label-caps text-[10px] mb-1">CONTAINER ID</p>
+<p class="font-mono-code text-on-surface">f29e1d83bc01</p>
+</div>
+<div class="bg-surface-container p-6">
+<p class="text-slate-500 font-label-caps text-[10px] mb-1">CREATED AT</p>
+<p class="text-on-surface">Oct 24, 2023 • 14:22:05</p>
+</div>
+<div class="bg-surface-container p-6">
+<p class="text-slate-500 font-label-caps text-[10px] mb-1">IP ADDRESS</p>
+<p class="font-mono-code text-on-surface">172.18.0.4</p>
+</div>
+</div>
+</div>
+<!-- Env Vars -->
+<div class="bg-surface-container rounded-xl border border-outline-variant overflow-hidden">
+<div class="px-6 py-4 border-b border-outline-variant bg-surface-container-low flex items-center justify-between">
+<span class="font-label-caps text-slate-300">ENVIRONMENT VARIABLES</span>
+<button class="text-primary text-xs font-medium hover:underline">Edit</button>
+</div>
+<div class="p-4 space-y-2">
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded border border-outline-variant font-mono-code text-sm">
+<span class="text-slate-400">NODE_ENV</span>
+<span class="text-secondary">production</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded border border-outline-variant font-mono-code text-sm">
+<span class="text-slate-400">API_ENDPOINT</span>
+<span class="text-secondary">https://api.internal/v1</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded border border-outline-variant font-mono-code text-sm">
+<span class="text-slate-400">PORT</span>
+<span class="text-secondary">3000</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Volumes & Sidebar -->
+<div class="space-y-6">
+<div class="bg-surface-container rounded-xl border border-outline-variant p-6">
+<h4 class="font-label-caps text-slate-300 mb-6">MOUNTED VOLUMES</h4>
+<div class="space-y-4">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-500 mt-1" data-icon="folder">folder</span>
+<div>
+<p class="text-body-sm font-medium text-on-surface">/app/config</p>
+<p class="text-[10px] text-slate-500 font-mono-code">Read Only</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-500 mt-1" data-icon="storage">storage</span>
+<div>
+<p class="text-body-sm font-medium text-on-surface">/var/log/nginx</p>
+<p class="text-[10px] text-slate-500 font-mono-code">Persistent • 2.4 GB</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container rounded-xl border border-outline-variant p-6">
+<h4 class="font-label-caps text-slate-300 mb-4">HEALTH CHECK</h4>
+<div class="flex items-center gap-4 mb-4">
+<div class="w-12 h-12 rounded-full border-4 border-secondary border-t-transparent flex items-center justify-center">
+<span class="text-xs font-bold text-secondary">98%</span>
+</div>
+<div>
+<p class="text-body-base font-medium">System Optimal</p>
+<p class="text-body-sm text-slate-500">Last check: 2 min ago</p>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-[10px] font-label-caps text-slate-500">
+<span>UPTIME</span>
+<span class="text-on-surface">14d 2h 45m</span>
+</div>
+<div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary w-[98%] h-full"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Mini Terminal View -->
+<div class="bg-black border border-slate-800 rounded-xl overflow-hidden">
+<div class="px-4 py-2 border-b border-slate-800 bg-slate-900 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-500 text-sm" data-icon="terminal">terminal</span>
+<span class="text-xs font-label-caps text-slate-400">LIVE CONTAINER LOGS</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="content_copy">content_copy</span>
+</button>
+<button class="text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="close_fullscreen">close_fullscreen</span>
+</button>
+</div>
+</div>
+<div class="p-4 font-mono-code text-[13px] leading-relaxed h-48 overflow-y-auto bg-black text-white/90">
+<p class="text-emerald-500">[2023-10-24 14:55:01] <span class="text-white">INFO: Starting nginx/1.21.0</span></p>
+<p class="text-emerald-500">[2023-10-24 14:55:02] <span class="text-white">INFO: Configuration loaded successfully</span></p>
+<p class="text-emerald-500">[2023-10-24 14:55:02] <span class="text-white">INFO: Listening on port 80</span></p>
+<p class="text-slate-500">[2023-10-24 14:58:12] DEBUG: GET /api/v1/status 200 12ms</p>
+<p class="text-slate-500">[2023-10-24 14:58:15] DEBUG: GET /favicon.ico 404 4ms</p>
+<p class="text-emerald-500">[2023-10-24 15:01:44] <span class="text-white">INFO: Connection accepted from 10.0.1.45</span></p>
+<div class="mt-1">
+<span class="text-primary-container">$</span>
+<span class="text-white ml-2">tail -f /var/log/nginx/access.log</span>
+<span class="terminal-cursor"></span>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual FAB (Only on main dashboard/home, suppressed here per rules, but showing knowledge of intent) -->
+<!-- Suppressed on Container Details Page -->
+</body></html>
