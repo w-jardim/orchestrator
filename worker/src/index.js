@@ -6,12 +6,14 @@ require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const { Worker } = require('bullmq');
 const { getQueueConnection } = require('@plagard/core/src/queue/connection');
 const { QUEUES } = require('@plagard/core/src/queue');
-const { defaultProcessor } = require('./processors/default.processor');
 const logger = require('@plagard/core/src/logger');
+logger.info('Resolved QUEUES at startup', { QUEUES });
+const { defaultProcessor } = require('./processors/default.processor');
 
 const CONCURRENCY = Number(process.env.WORKER_CONCURRENCY) || 5;
 
 function createWorker(queueName, processor) {
+  logger.info('Creating worker', { queueName });
   const worker = new Worker(queueName, processor, {
     connection: getQueueConnection(),
     concurrency: CONCURRENCY,

@@ -5,9 +5,9 @@ const { getQueueConnection } = require('./connection');
 const logger = require('../logger');
 
 const QUEUES = {
-  TASKS: 'plagard:tasks',
-  DEPLOY: 'plagard:deploy',
-  AUDIT: 'plagard:audit',
+  TASKS: 'plagard_tasks',
+  DEPLOY: 'plagard_deploy',
+  AUDIT: 'plagard_audit',
 };
 
 const _instances = new Map();
