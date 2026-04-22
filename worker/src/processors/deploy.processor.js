@@ -7,6 +7,7 @@ const deployService = require('@plagard/backend/src/services/deploy.service');
 const { logAction } = require('@plagard/backend/src/services/audit.service');
 
 async function deployProcessor(job) {
+  const startedAt = Date.now();
   const {
     deployId,
     image,
@@ -87,6 +88,7 @@ async function deployProcessor(job) {
         deployId,
         tenantId,
         containerId: container.fullId,
+        durationMs: Date.now() - startedAt,
       },
       status: 'success',
       timestamp: new Date().toISOString(),
@@ -142,6 +144,7 @@ async function deployProcessor(job) {
         containerName,
         recoveredFrom: err.code || err.message,
         containerId: recoveredContainer.fullId,
+        duration: Date.now() - startedAt,
       });
 
       return {
@@ -162,8 +165,9 @@ async function deployProcessor(job) {
       : null;
 
     await deployService.markDeployFailed(deployId, {
-      error: err.code || err.message,
+      error: err,
       logs: logText,
+      stageSource: 'worker',
     });
 
     await logAction({
@@ -178,6 +182,7 @@ async function deployProcessor(job) {
         deployId,
         tenantId,
         error: err.code || err.message,
+        durationMs: Date.now() - startedAt,
       },
       status: 'failure',
       timestamp: new Date().toISOString(),

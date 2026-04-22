@@ -29,7 +29,20 @@ const logger = winston.createLogger({
   exitOnError: false,
 });
 
-// Audit helper: structured audit log
+function normalizeOperationMeta(meta = {}) {
+  const normalized = { ...meta };
+
+  if (normalized.duration == null && normalized.durationMs != null) {
+    normalized.duration = normalized.durationMs;
+  }
+
+  return normalized;
+}
+
+logger.operation = function operation(message, meta = {}) {
+  this.info(message, normalizeOperationMeta(meta));
+};
+
 logger.audit = function audit(message, meta = {}) {
   this.info(message, Object.assign({ audit: true }, meta));
 };

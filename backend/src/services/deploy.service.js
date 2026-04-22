@@ -25,6 +25,7 @@ const DOCKER_IMAGE_RE = /^(?:(?:[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?(?::[0-9]+)?\/)
 const PORT_MAPPING_RE = /^(\d{1,5}):(\d{1,5})$/;
 const ENV_KEY_RE = /^[A-Z_][A-Z0-9_]*$/i;
 const MAX_ENV_VARS = Number(process.env.DEPLOY_MAX_ENV_VARS) || 50;
+const FAILED_RETENTION_HOURS = Number(process.env.DEPLOY_FAILED_RETENTION_HOURS) || 72;
 
 function getDb() {
   return getDatabase();
@@ -57,6 +58,52 @@ function buildContainerName(tenantId, deployName) {
   return `plagard-${tenantId}-${deployName}`;
 }
 
+function toIsoDate(value) {
+  return value instanceof Date ? value.toISOString() : value;
+}
+
+function calculateDurationMs(startedAt, fallbackStartedAt = null, finishedAt = new Date()) {
+  const start = startedAt || fallbackStartedAt;
+  if (!start) return null;
+  return Math.max(0, new Date(finishedAt).getTime() - new Date(start).getTime());
+}
+
+function buildStatusHistory(current, entry) {
+  const history = safeJsonParse(current, []);
+  return JSON.stringify([].concat(Array.isArray(history) ? history : [], [entry]));
+}
+
+function buildErrorSnapshot(error, details = null) {
+  if (error == null) {
+    return {
+      message: null,
+      code: null,
+      details: details || null,
+    };
+  }
+
+  if (typeof error === 'string') {
+    return {
+      message: error,
+      code: null,
+      details: details || null,
+    };
+  }
+
+  const snapshot = {
+    message: error.message || 'Erro de deploy',
+    code: error.code || null,
+    statusCode: error.statusCode || null,
+    details: details || error.details || null,
+  };
+
+  if (error.stack) {
+    snapshot.stack = String(error.stack).split('\n').slice(0, 8).join('\n');
+  }
+
+  return snapshot;
+}
+
 function serializeDeploy(row) {
   if (!row) return null;
 
@@ -73,6 +120,15 @@ function serializeDeploy(row) {
     env: safeJsonParse(row.env, {}),
     logs: row.logs,
     error: row.error,
+    lastErrorCode: row.last_error_code || null,
+    lastErrorDetails: safeJsonParse(row.last_error_details, null),
+    executionDurationMs: row.execution_duration_ms == null ? null : Number(row.execution_duration_ms),
+    statusHistory: safeJsonParse(row.status_history, []),
+    queuedAt: toIsoDate(row.queued_at || row.created_at),
+    startedAt: toIsoDate(row.started_at),
+    finishedAt: toIsoDate(row.finished_at),
+    reconciledAt: toIsoDate(row.reconciled_at),
+    retentionUntil: toIsoDate(row.retention_until),
     createdBy: row.created_by,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -106,12 +162,14 @@ function validatePorts(ports, planLimits = null) {
     throw new AppError('Ports deve ser um array', 422, 'INVALID_PORTS');
   }
 
+  const seenHostPorts = new Set();
+
   return ports.map((entry) => {
     const value = String(entry || '').trim();
     const match = value.match(PORT_MAPPING_RE);
 
     if (!match) {
-      throw new AppError('Porta invalida. Use HOST:CONTAINER', 422, 'INVALID_PORTS');
+      throw new AppError('Formato de porta invalido. Use HOST:CONTAINER', 400, 'INVALID_PORT_CONFIGURATION');
     }
 
     const hostPort = Number(match[1]);
@@ -120,6 +178,12 @@ function validatePorts(ports, planLimits = null) {
     if (hostPort < 1 || hostPort > 65535 || containerPort < 1 || containerPort > 65535) {
       throw new AppError('Porta invalida. Intervalo permitido: 1-65535', 422, 'INVALID_PORTS');
     }
+
+    if (seenHostPorts.has(hostPort)) {
+      throw new AppError('Portas duplicadas no payload', 400, 'INVALID_PORT_CONFIGURATION');
+    }
+
+    seenHostPorts.add(hostPort);
 
     if (planLimits) {
       const { min, max } = planLimits.allowedPortRange;
@@ -182,26 +246,67 @@ async function updateDeployById(id, patch) {
 }
 
 async function markDeployRunning(id) {
+  const row = await findDeployRowById(id);
+  const startedAt = row?.started_at || new Date();
+
   return updateDeployById(id, {
     status: DEPLOY_STATUSES.RUNNING,
     error: null,
+    last_error_code: null,
+    last_error_details: null,
+    started_at: startedAt,
+    status_history: buildStatusHistory(row?.status_history, {
+      stage: DEPLOY_STATUSES.RUNNING,
+      timestamp: new Date().toISOString(),
+      source: 'worker',
+    }),
   });
 }
 
-async function markDeploySuccess(id, { containerId, logs = null }) {
+async function markDeploySuccess(id, { containerId, logs = null, stageSource = 'worker' }) {
+  const row = await findDeployRowById(id);
+  const finishedAt = new Date();
+
   return updateDeployById(id, {
     status: DEPLOY_STATUSES.SUCCESS,
     container_id: containerId,
     logs,
     error: null,
+    last_error_code: null,
+    last_error_details: null,
+    finished_at: finishedAt,
+    execution_duration_ms: calculateDurationMs(row?.started_at, row?.queued_at || row?.created_at, finishedAt),
+    status_history: buildStatusHistory(row?.status_history, {
+      stage: DEPLOY_STATUSES.SUCCESS,
+      timestamp: finishedAt.toISOString(),
+      source: stageSource,
+      containerId,
+    }),
   });
 }
 
-async function markDeployFailed(id, { error, logs = null }) {
+async function markDeployFailed(id, { error, logs = null, stageSource = 'worker' }) {
+  const row = await findDeployRowById(id);
+  const finishedAt = new Date();
+  const snapshot = buildErrorSnapshot(error);
+  const retentionUntil = new Date(finishedAt.getTime() + (FAILED_RETENTION_HOURS * 60 * 60 * 1000));
+
   return updateDeployById(id, {
     status: DEPLOY_STATUSES.FAILED,
-    error,
+    error: snapshot.message,
+    last_error_code: snapshot.code,
+    last_error_details: JSON.stringify(snapshot),
     logs,
+    finished_at: finishedAt,
+    execution_duration_ms: calculateDurationMs(row?.started_at, row?.queued_at || row?.created_at, finishedAt),
+    retention_until: retentionUntil,
+    status_history: buildStatusHistory(row?.status_history, {
+      stage: DEPLOY_STATUSES.FAILED,
+      timestamp: finishedAt.toISOString(),
+      source: stageSource,
+      errorCode: snapshot.code,
+      errorMessage: snapshot.message,
+    }),
   });
 }
 
@@ -211,6 +316,12 @@ async function appendDeployLogs(id, message) {
 
   return updateDeployById(id, {
     logs: appendLog(row.logs, message),
+  });
+}
+
+async function touchReconciled(id) {
+  return updateDeployById(id, {
+    reconciled_at: new Date(),
   });
 }
 
@@ -281,10 +392,39 @@ async function assertPlanLimits(tenant, ports, { excludeDeployId = null } = {}) 
   validatePorts(ports, limits);
 }
 
+async function assertPortsAvailable(ports, { excludeDeployId = null } = {}) {
+  if (!Array.isArray(ports) || ports.length === 0) return;
+
+  const hostPorts = new Set(ports.map((entry) => Number(String(entry).split(':')[0])));
+  const db = getDb();
+  let query = db(TABLE)
+    .select('id', 'ports')
+    .whereIn('status', [
+      DEPLOY_STATUSES.PENDING,
+      DEPLOY_STATUSES.RUNNING,
+      DEPLOY_STATUSES.SUCCESS,
+    ]);
+
+  if (excludeDeployId) {
+    query = query.whereNot({ id: excludeDeployId });
+  }
+
+  const rows = await query;
+  const conflicting = rows.find((row) => {
+    const deployedPorts = safeJsonParse(row.ports, []);
+    return deployedPorts.some((entry) => hostPorts.has(Number(String(entry).split(':')[0])));
+  });
+
+  if (conflicting) {
+    throw new AppError('Uma ou mais portas ja estao em uso por outro deploy', 409, 'PORT_ALREADY_IN_USE');
+  }
+}
+
 async function insertDeployRecord({ tenantId, name, image, ports, env, createdBy }) {
   const db = getDb();
   const containerName = buildContainerName(tenantId, name);
   const containerAlias = name;
+  const queuedAt = new Date();
 
   const [id] = await db(TABLE).insert({
     tenant_id: tenantId,
@@ -296,6 +436,12 @@ async function insertDeployRecord({ tenantId, name, image, ports, env, createdBy
     ports: JSON.stringify(ports),
     env: JSON.stringify(env),
     created_by: createdBy,
+    queued_at: queuedAt,
+    status_history: JSON.stringify([{
+      stage: 'queued',
+      timestamp: queuedAt.toISOString(),
+      source: 'api',
+    }]),
   });
 
   return id;
@@ -321,6 +467,7 @@ async function createDeploy({ name, image, ports, env, user, ip, tenantScope }) 
 
   await assertPlanLimits(tenant, normalizedPorts);
   await assertDeployNameAvailable(normalizedName, tenant.id);
+  await assertPortsAvailable(normalizedPorts);
 
   const deployId = await insertDeployRecord({
     tenantId: tenant.id,
@@ -337,6 +484,7 @@ async function createDeploy({ name, image, ports, env, user, ip, tenantScope }) 
   await enqueueDeploy({
     deployId,
     name: deploy.containerName,
+    containerName: deploy.containerName,
     image: normalizedImage,
     ports: normalizedPorts,
     env: normalizedEnv,
@@ -486,17 +634,30 @@ async function redeploy({ id, user, ip }) {
 
   const deploy = serializeDeploy(row);
   await assertPlanLimits(tenant, deploy.ports, { excludeDeployId: row.id });
+  await assertPortsAvailable(deploy.ports, { excludeDeployId: row.id });
 
   await updateDeployById(row.id, {
     status: DEPLOY_STATUSES.PENDING,
     error: null,
+    last_error_code: null,
+    last_error_details: null,
+    queued_at: new Date(),
+    started_at: null,
+    finished_at: null,
+    execution_duration_ms: null,
     logs: appendLog(row.logs, 'Redeploy solicitado'),
+    status_history: buildStatusHistory(row.status_history, {
+      stage: 'queued',
+      timestamp: new Date().toISOString(),
+      source: 'api.redeploy',
+    }),
   });
 
   await removeDeployJobIfExists(row.id);
   await enqueueDeploy({
     deployId: row.id,
     name: deploy.containerName,
+    containerName: deploy.containerName,
     image: deploy.image,
     ports: deploy.ports,
     env: deploy.env,
@@ -526,10 +687,12 @@ module.exports = {
   markDeploySuccess,
   markDeployFailed,
   appendDeployLogs,
+  touchReconciled,
   validateDeployName,
   validateImage,
   validatePorts,
   sanitizeEnv,
   assertPlanLimits,
+  assertPortsAvailable,
   assertDeployNameAvailable,
 };

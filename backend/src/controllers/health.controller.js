@@ -3,6 +3,7 @@
 const { checkDatabaseConnection } = require('../config/database');
 const { getRedisClient } = require('../config/redis');
 const logger = require('@plagard/core/src/logger');
+const { getFullHealth } = require('../services/health.service');
 
 async function saude(req, res) {
   const checks = { database: 'ok', redis: 'ok' };
@@ -35,4 +36,13 @@ async function saude(req, res) {
   });
 }
 
-module.exports = { saude };
+async function healthFull(req, res, next) {
+  try {
+    const payload = await getFullHealth();
+    return res.status(payload.status === 'ok' ? 200 : 503).json(payload);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+module.exports = { saude, healthFull };

@@ -1,6 +1,7 @@
 'use strict';
 
 const logger = require('@plagard/core/src/logger');
+const maintenanceService = require('@plagard/backend/src/services/maintenance.service');
 
 async function defaultProcessor(job) {
   logger.info('Processing job', {
@@ -13,6 +14,10 @@ async function defaultProcessor(job) {
   switch (job.name) {
     case 'ping':
       return handlePing(job);
+    case 'system.reconcile':
+      return maintenanceService.reconcileDeployStates();
+    case 'system.cleanup':
+      return maintenanceService.runCleanupCycle();
     default:
       logger.warn('Unknown job name, skipping', { jobName: job.name });
       return { skipped: true };

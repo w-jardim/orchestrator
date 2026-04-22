@@ -16,6 +16,7 @@ function normalizeDeployPayload(data = {}) {
   return {
     deployId: Number(data.deployId),
     name: String(data.name || '').trim(),
+    containerName: data.containerName ? String(data.containerName).trim() : null,
     image: String(data.image || '').trim(),
     ports: Array.isArray(data.ports) ? data.ports : [],
     env: data.env && typeof data.env === 'object' && !Array.isArray(data.env) ? data.env : {},
@@ -67,4 +68,21 @@ async function enqueueDeploy(data, opts = {}) {
   });
 }
 
-module.exports = { getQueue, addJob, enqueueDeploy, QUEUES };
+async function upsertRecurringJob(queueName, jobName, data, repeat = {}, opts = {}) {
+  const queue = getQueue(queueName);
+  const job = await queue.add(jobName, data, {
+    jobId: opts.jobId || jobName,
+    repeat,
+    ...opts,
+  });
+
+  logger.info('Recurring job ensured', {
+    queue: queueName,
+    job: jobName,
+    repeat,
+  });
+
+  return job;
+}
+
+module.exports = { getQueue, addJob, enqueueDeploy, upsertRecurringJob, QUEUES };
