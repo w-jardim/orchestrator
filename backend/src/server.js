@@ -14,6 +14,9 @@ async function bootstrap() {
     logger.info('Starting Plagard Orchestrator backend...');
 
     await checkDatabaseConnection();
+    // seed admin user after DB connection
+    const seedAdmin = require('./bootstrap/seedAdmin');
+    await seedAdmin();
     await checkRedisConnection();
 
     const server = app.listen(PORT, () => {

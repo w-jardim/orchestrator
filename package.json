@@ -5,6 +5,7 @@
   "description": "Plataforma de orquestração de infraestrutura e SaaS",
   "workspaces": [
     "core",
+    "integrations",
     "backend",
     "worker"
   ],

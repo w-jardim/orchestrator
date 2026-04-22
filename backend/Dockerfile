@@ -6,6 +6,7 @@ WORKDIR /build
 # Copy workspace manifests first for layer caching
 COPY package.json ./
 COPY core/package.json ./core/
+COPY integrations/package.json ./integrations/
 COPY backend/package.json ./backend/
 
 # Install all workspace dependencies
@@ -13,6 +14,7 @@ RUN npm install --workspaces --include-workspace-root
 
 # Copy source code
 COPY core/ ./core/
+COPY integrations/ ./integrations/
 COPY backend/ ./backend/
 
 # ─── Production stage ─────────────────────────────────────────────────────────
@@ -28,6 +30,7 @@ WORKDIR /app
 # Copy installed node_modules and source
 COPY --from=builder /build/node_modules ./node_modules
 COPY --from=builder /build/core ./node_modules/@plagard/core
+COPY --from=builder /build/integrations ./node_modules/@plagard/integrations
 COPY --from=builder /build/backend/src ./src
 COPY --from=builder /build/backend/package.json ./package.json
 

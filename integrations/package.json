@@ -1,0 +1,9 @@
+{
+  "name": "@plagard/integrations",
+  "version": "1.0.0",
+  "description": "Integrações externas do Plagard Orchestrator (Docker, Nginx, SSL, Git)",
+  "private": true,
+  "dependencies": {
+    "dockerode": "^4.0.2"
+  }
+}

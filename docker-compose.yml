@@ -3,6 +3,8 @@ services:
     image: plagard-backend-test
     container_name: plagard-backend
     restart: unless-stopped
+    user: "0:0"
+    privileged: true
     ports:
       - "${PORT:-3000}:3000"
     env_file:
@@ -20,6 +22,7 @@ services:
     volumes:
       - ./backend/src:/app/src:ro
       - ./core:/app/node_modules/@plagard/core:ro
+      - /var/run/docker.sock:/var/run/docker.sock
 
   worker:
     image: plagard-worker-test
@@ -69,6 +72,11 @@ services:
     image: redis:7-alpine
     container_name: plagard-redis
     restart: unless-stopped
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --requirepass "${REDIS_PASS:-}"
     ports:
       - "6379:6379"
     volumes:
