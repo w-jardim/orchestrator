@@ -8,7 +8,7 @@ interface CardProps {
 
 export function Card({ children, className = '', padding = true }: CardProps) {
   return (
-    <div className={`rounded-xl border border-gray-700/50 bg-gray-800/50 ${padding ? 'p-5' : ''} ${className}`}>
+    <div className={`min-w-0 overflow-hidden rounded-xl border border-gray-700/50 bg-gray-800/50 ${padding ? 'p-5' : ''} ${className}`}>
       {children}
     </div>
   )
@@ -22,10 +22,10 @@ interface CardHeaderProps {
 
 export function CardHeader({ title, subtitle, action }: CardHeaderProps) {
   return (
-    <div className="mb-4 flex items-start justify-between">
-      <div>
-        <h2 className="text-sm font-semibold text-gray-100">{title}</h2>
-        {subtitle && <p className="mt-0.5 text-xs text-gray-500">{subtitle}</p>}
+    <div className="mb-4 flex min-w-0 items-start justify-between gap-3">
+      <div className="min-w-0">
+        <h2 className="truncate text-sm font-semibold text-gray-100">{title}</h2>
+        {subtitle && <p className="mt-0.5 break-words text-xs text-gray-500">{subtitle}</p>}
       </div>
       {action && <div className="ml-4 shrink-0">{action}</div>}
     </div>

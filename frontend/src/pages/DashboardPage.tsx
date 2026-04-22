@@ -9,7 +9,7 @@ import { useHealth } from '../hooks/useHealth'
 function formatTimestamp(timestamp: string | null | undefined) {
   if (!timestamp) return 'Não disponível'
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(timestamp))
@@ -21,40 +21,42 @@ export function DashboardPage() {
   const healthState = useHealth()
 
   const runningContainers = containersState.containers.filter((container) => {
-    const state = typeof container.State === 'string'
-      ? container.State
-      : typeof container.state === 'string'
-        ? container.state
-        : container.state?.status
+    const state =
+      typeof container.State === 'string'
+        ? container.State
+        : typeof container.state === 'string'
+          ? container.state
+          : container.state?.status
 
     return state === 'running'
   }).length
+
   const stoppedContainers = containersState.containers.length - runningContainers
   const queuedDeploys = deploysState.deploys.filter((deploy) => deploy.status === 'pending' || deploy.status === 'running').length
   const failedDeploys = deploysState.deploys.filter((deploy) => deploy.status === 'failed').length
 
   return (
-    <div className="space-y-6">
-      <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="max-w-2xl">
+    <div className="min-w-0 space-y-6 overflow-x-hidden">
+      <section className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="min-w-0 max-w-2xl">
           <p className="font-['Space_Grotesk'] text-xs font-semibold uppercase tracking-[0.32em] text-cyan-300/80">
             Plagard orchestrator
           </p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+          <h1 className="mt-3 break-words text-3xl font-semibold tracking-tight text-white sm:text-4xl">
             Operações Docker em um único plano de controle
           </h1>
-          <p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">
+          <p className="mt-3 break-words text-sm leading-6 text-slate-400 sm:text-base">
             Monitore containers do tenant, acompanhe execuções de deploy e observe a saúde dos serviços em um único painel.
           </p>
         </div>
 
-        <div className="rounded-3xl border border-slate-800 bg-slate-900/70 px-5 py-4 backdrop-blur">
+        <div className="min-w-0 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900/70 px-5 py-4 backdrop-blur">
           <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Última atualização de saúde</p>
-          <p className="mt-2 text-sm font-medium text-slate-200">{formatTimestamp(healthState.health?.timestamp)}</p>
+          <p className="mt-2 truncate text-sm font-medium text-slate-200">{formatTimestamp(healthState.health?.timestamp)}</p>
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Containers em execução"
           value={String(runningContainers)}
@@ -101,7 +103,7 @@ export function DashboardPage() {
         />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,1fr)]">
+      <section className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,1fr)]">
         <ContainersTable
           containers={containersState.containers}
           loading={containersState.loading}
@@ -118,7 +120,7 @@ export function DashboardPage() {
         />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]">
+      <section className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]">
         <DeploysList
           deploys={deploysState.deploys}
           loading={deploysState.loading}
@@ -128,14 +130,14 @@ export function DashboardPage() {
           onRedeploy={deploysState.redeploy}
         />
 
-        <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
+        <div className="min-w-0 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
           <p className="font-['Space_Grotesk'] text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
             Notas operacionais
           </p>
           <div className="mt-5 space-y-4">
             <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
               <p className="text-sm font-medium text-slate-200">API de deploy</p>
-              <p className="mt-2 text-sm text-slate-400">
+              <p className="mt-2 break-words text-sm text-slate-400">
                 {deploysState.error
                   ? 'Endpoint de deploy indisponível no momento.'
                   : `${deploysState.deploys.length} registros de deploy retornados por /api/deploy.`}
@@ -143,7 +145,7 @@ export function DashboardPage() {
             </div>
             <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
               <p className="text-sm font-medium text-slate-200">Saúde de runtime</p>
-              <p className="mt-2 text-sm text-slate-400">
+              <p className="mt-2 break-words text-sm text-slate-400">
                 {healthState.health
                   ? `O backend reporta status ${healthState.health.status} com versão ${healthState.health.version ?? 'desconhecida'}.`
                   : 'Aguardando resposta de /health/full.'}
@@ -151,7 +153,7 @@ export function DashboardPage() {
             </div>
             <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
               <p className="text-sm font-medium text-slate-200">Ações de container</p>
-              <p className="mt-2 text-sm text-slate-400">
+              <p className="mt-2 break-words text-sm text-slate-400">
                 As ações de iniciar, parar e reiniciar chamam os endpoints reais do Docker e atualizam a tabela após a conclusão.
               </p>
             </div>

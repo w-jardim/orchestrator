@@ -19,13 +19,13 @@ const toneClasses = {
 export function StatCard({ label, value, helper, icon, tone = 'default' }: StatCardProps) {
   return (
     <Card className="overflow-hidden border-slate-800/80 bg-slate-900/70">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{label}</p>
-          <p className="mt-4 text-3xl font-semibold tracking-tight text-white">{value}</p>
-          <p className="mt-2 text-sm text-slate-400">{helper}</p>
+      <div className="flex min-w-0 items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="break-words text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{label}</p>
+          <p className="mt-4 truncate text-3xl font-semibold tracking-tight text-white">{value}</p>
+          <p className="mt-2 break-words text-sm text-slate-400">{helper}</p>
         </div>
-        <div className={`rounded-2xl border p-3 ${toneClasses[tone]}`}>{icon}</div>
+        <div className={`shrink-0 rounded-2xl border p-3 ${toneClasses[tone]}`}>{icon}</div>
       </div>
     </Card>
   )
