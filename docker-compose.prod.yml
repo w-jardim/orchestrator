@@ -1,0 +1,118 @@
+services:
+  # Backend API (exposed on 3002 to avoid conflicts with existing services)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: orchestrator-backend
+    ports:
+      - '3002:3000'
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASS: ${REDIS_PASS}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_ACCESS_EXPIRES: ${JWT_ACCESS_EXPIRES}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      DOCKER_ALLOWED_CONTAINERS: ${DOCKER_ALLOWED_CONTAINERS}
+      DOCKER_ALLOWED_IMAGES: ${DOCKER_ALLOWED_IMAGES}
+    volumes:
+      - ./logs/backend:/app/logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - orchestrator
+    restart: always
+    healthcheck:
+      test: ['CMD', 'curl', '--fail', 'http://localhost:3000/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Frontend (React + Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_API_URL: ${VITE_API_URL:-https://orchestrator.plagardsystems.com.br}
+    container_name: orchestrator-frontend
+    ports:
+      - '3003:80'
+    depends_on:
+      - backend
+    networks:
+      - orchestrator
+    restart: always
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost/']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: orchestrator-mysql
+    expose:
+      - '3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./database/migrations:/docker-entrypoint-initdb.d:ro
+    networks:
+      - orchestrator
+    restart: always
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p${MYSQL_ROOT_PASSWORD}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # Redis Cache
+  redis:
+    image: redis:7.4-alpine
+    container_name: orchestrator-redis
+    expose:
+      - '6379'
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASS}
+    volumes:
+      - redis-data:/data
+    networks:
+      - orchestrator
+    restart: always
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  mysql-data:
+    driver: local
+  redis-data:
+    driver: local
+
+networks:
+  orchestrator:
+    driver: bridge

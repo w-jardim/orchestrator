@@ -6,7 +6,7 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-const logger = require('@plagard/core/src/logger');
+const logger = require('./utils/logger');
 const routes = require('./routes');
 const { saude, healthFull } = require('./controllers/health.controller');
 const { errorHandler, notFoundHandler } = require('./middlewares/error.middleware');
@@ -64,6 +64,7 @@ app.use((req, res, next) => {
 app.set('trust proxy', 1);
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
 app.get('/saude', saude);
 app.get('/health/full', healthFull);
 app.use(routes);

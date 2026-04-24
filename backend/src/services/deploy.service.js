@@ -1,8 +1,8 @@
 'use strict';
 
-const { getQueue, QUEUES, enqueueDeploy } = require('@plagard/core/src/queue');
-const { hasMinimumRole, ROLES } = require('@plagard/core/src/policies');
-const logger = require('@plagard/core/src/logger');
+const { getQueue, QUEUES, enqueueDeploy } = require('../config/plagard-core-shim').queue;
+const { hasMinimumRole, ROLES } = require('../config/plagard-core-shim').policies;
+const logger = require('../config/plagard-core-shim').logger;
 const { getDatabase } = require('../config/database');
 const { logAction } = require('./audit.service');
 const dockerService = require('./docker.service');

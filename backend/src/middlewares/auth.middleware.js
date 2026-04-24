@@ -1,8 +1,8 @@
 'use strict';
 
-const { verifyAccessToken } = require('@plagard/core/src/auth/jwt');
-const { hasMinimumRole } = require('@plagard/core/src/policies');
-const logger = require('@plagard/core/src/logger');
+const { verifyAccessToken } = require('../config/plagard-core-shim').auth.jwt;
+const { hasMinimumRole } = require('../config/plagard-core-shim').policies;
+const logger = require('../config/plagard-core-shim').logger;
 
 function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;

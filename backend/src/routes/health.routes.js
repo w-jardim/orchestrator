@@ -6,6 +6,6 @@ const { saude, healthFull } = require('../controllers/health.controller');
 const router = Router();
 
 router.get('/saude', saude);
-router.get('/health/full', healthFull);
+router.get('/full', healthFull);
 
 module.exports = router;

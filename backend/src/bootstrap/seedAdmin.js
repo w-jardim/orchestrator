@@ -1,6 +1,6 @@
 'use strict';
 
-const logger = require('@plagard/core/src/logger');
+const logger = require('../config/plagard-core-shim').logger;
 const { findByEmail, createUser } = require('../services/user.service');
 const { ensureDefaultTenant } = require('../services/tenant.service');
 

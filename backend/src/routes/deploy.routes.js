@@ -2,10 +2,10 @@
 
 const { Router } = require('express');
 const { body, param, query } = require('express-validator');
-const { ROLES } = require('@plagard/core/src/policies');
+const { ROLES } = require('../config/plagard-core-shim').policies;
 const controller = require('../controllers/deploy.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
-const { requireRole } = require('../middlewares/rbac');
+const rbac = require('../middlewares/rbac');
 const tenantContext = require('../middlewares/tenant-context.middleware');
 const validate = require('../middlewares/validate');
 
@@ -16,7 +16,7 @@ router.use(tenantContext);
 
 router.post(
   '/',
-  requireRole(ROLES.ADMIN),
+  rbac(ROLES.ADMIN),
   [
     body('name')
       .isString()
@@ -39,14 +39,14 @@ router.post(
 
 router.get(
   '/',
-  requireRole(ROLES.VIEWER),
+  rbac(ROLES.VIEWER),
   [query('tenantId').optional().isInt({ min: 1 }).withMessage('tenantId invalido')],
   validate,
   controller.list
 );
 
-router.get('/:id', requireRole(ROLES.VIEWER), [param('id').isInt({ min: 1 }).withMessage('id invalido')], validate, controller.getById);
-router.post('/:id/redeploy', requireRole(ROLES.ADMIN), [param('id').isInt({ min: 1 }).withMessage('id invalido')], validate, controller.redeploy);
-router.post('/:id/stop', requireRole(ROLES.ADMIN), [param('id').isInt({ min: 1 }).withMessage('id invalido')], validate, controller.stop);
+router.get('/:id', rbac(ROLES.VIEWER), [param('id').isInt({ min: 1 }).withMessage('id invalido')], validate, controller.getById);
+router.post('/:id/redeploy', rbac(ROLES.ADMIN), [param('id').isInt({ min: 1 }).withMessage('id invalido')], validate, controller.redeploy);
+router.post('/:id/stop', rbac(ROLES.ADMIN), [param('id').isInt({ min: 1 }).withMessage('id invalido')], validate, controller.stop);
 
 module.exports = router;

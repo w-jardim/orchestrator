@@ -34,3 +34,19 @@ data/
 
 # npm workspaces
 package-lock.json
+
+# Secrets & Credentials
+.ssh/
+*.pem
+*.key
+*.pfx
+credentials.json
+secrets.json
+
+# Claude workspace
+.claude/
+
+# OS temp files
+*.tmp
+*.bak
+*~
