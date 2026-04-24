@@ -4,7 +4,7 @@ const express = require('express');
 const { body, param, query } = require('express-validator');
 const ambienteController = require('../controllers/ambiente.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
-const { rbac } = require('../middlewares/rbac');
+const rbac = require('../middlewares/rbac');
 const { tenantContext } = require('../middlewares/tenant-context.middleware');
 const ambienteService = require('../services/ambiente.service');
 
