@@ -5,7 +5,7 @@ const { param, body, query } = require('express-validator');
 const { ROLES } = require('../config/plagard-core-shim').policies;
 const controller = require('../controllers/docker-images.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
-const { requireRole } = require('../middlewares/rbac');
+const rbac = require('../middlewares/rbac');
 const tenantContext = require('../middlewares/tenant-context.middleware');
 const createDockerRateLimiter = require('../middlewares/rateLimit');
 const validate = require('../middlewares/validate');
@@ -35,15 +35,15 @@ const validatePullBody = [
 const validateRemoveBody = [body('force').optional().isBoolean().withMessage('force deve ser booleano')];
 
 // GET /api/v1/docker/images
-router.get('/', requireRole(ROLES.VIEWER), validate, controller.list);
+router.get('/', rbac(ROLES.VIEWER), validate, controller.list);
 
 // GET /api/v1/docker/images/:id
-router.get('/:id', requireRole(ROLES.VIEWER), validateImageId, validate, controller.inspect);
+router.get('/:id', rbac(ROLES.VIEWER), validateImageId, validate, controller.inspect);
 
 // POST /api/v1/docker/images/pull
-router.post('/pull', requireRole(ROLES.ADMIN), validatePullBody, validate, controller.pull);
+router.post('/pull', rbac(ROLES.ADMIN), validatePullBody, validate, controller.pull);
 
 // DELETE /api/v1/docker/images/:id
-router.delete('/:id', requireRole(ROLES.ADMIN), validateImageId, validateRemoveBody, validate, controller.remove);
+router.delete('/:id', rbac(ROLES.ADMIN), validateImageId, validateRemoveBody, validate, controller.remove);
 
 module.exports = router;

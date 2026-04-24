@@ -5,7 +5,7 @@ const { body, param } = require('express-validator');
 const { ROLES } = require('../config/plagard-core-shim').policies;
 const controller = require('../controllers/git-credentials.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
-const { requireRole } = require('../middlewares/rbac');
+const rbac = require('../middlewares/rbac');
 const tenantContext = require('../middlewares/tenant-context.middleware');
 const validate = require('../middlewares/validate');
 
@@ -41,27 +41,27 @@ const validateConfigureGitBody = [
   body('email').trim().isEmail().withMessage('Email inválido'),
 ];
 
-router.get('/', requireRole(ROLES.ADMIN), validate, controller.listKeys);
+router.get('/', rbac(ROLES.ADMIN), validate, controller.listKeys);
 
 router.post(
   '/generate',
-  requireRole(ROLES.ADMIN),
+  rbac(ROLES.ADMIN),
   validateGenerateKeyBody,
   validate,
   controller.generateKey
 );
 
-router.post('/add', requireRole(ROLES.ADMIN), validateAddKeyBody, validate, controller.addKey);
+router.post('/add', rbac(ROLES.ADMIN), validateAddKeyBody, validate, controller.addKey);
 
-router.delete('/:name', requireRole(ROLES.ADMIN), validateName, validate, controller.removeKey);
+router.delete('/:name', rbac(ROLES.ADMIN), validateName, validate, controller.removeKey);
 
-router.get('/:name/fingerprint', requireRole(ROLES.ADMIN), validateName, validate, controller.getFingerprint);
+router.get('/:name/fingerprint', rbac(ROLES.ADMIN), validateName, validate, controller.getFingerprint);
 
-router.post('/test-auth', requireRole(ROLES.ADMIN), validateTestAuthBody, validate, controller.testAuth);
+router.post('/test-auth', rbac(ROLES.ADMIN), validateTestAuthBody, validate, controller.testAuth);
 
 router.post(
   '/configure',
-  requireRole(ROLES.ADMIN),
+  rbac(ROLES.ADMIN),
   validateConfigureGitBody,
   validate,
   controller.configureGit
