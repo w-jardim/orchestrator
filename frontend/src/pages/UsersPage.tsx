@@ -178,7 +178,7 @@ export function UsersPage() {
                   <td className="px-4 py-3 text-slate-50">{user.name}</td>
                   <td className="px-4 py-3 text-slate-300">{user.email}</td>
                   <td className="px-4 py-3">
-                    <Badge variant={user.role === 'ADMIN_MASTER' ? 'red' : user.role === 'ADMIN' ? 'blue' : 'default'}>
+                    <Badge variant={user.role === 'ADMIN_MASTER' ? 'red' : user.role === 'ADMIN' ? 'blue' : 'gray'}>
                       {user.role}
                     </Badge>
                   </td>
