@@ -30,7 +30,6 @@ export function ProjectsPage() {
   }
 
   const tipoOptions = ['nodejs', 'python', 'docker', 'static', 'custom']
-  const statusOptions = ['ativo', 'pausado', 'deletado']
 
   return (
     <div className="space-y-6">
@@ -114,19 +113,21 @@ export function ProjectsPage() {
                   <p className="text-sm text-slate-400">{project.descricao}</p>
                   <div className="flex items-center gap-2">
                     <Badge
-                      label={project.tipo}
-                      color={
+                      variant={
                         project.tipo === 'nodejs'
                           ? 'green'
                           : project.tipo === 'python'
                             ? 'blue'
-                            : 'purple'
+                            : 'indigo'
                       }
-                    />
+                    >
+                      {project.tipo}
+                    </Badge>
                     <Badge
-                      label={project.status}
-                      color={project.status === 'ativo' ? 'green' : 'red'}
-                    />
+                      variant={project.status === 'ativo' ? 'green' : 'red'}
+                    >
+                      {project.status}
+                    </Badge>
                   </div>
                   <p className="text-xs text-slate-500 mt-3">
                     Criado em {new Date(project.created_at).toLocaleDateString('pt-BR')}

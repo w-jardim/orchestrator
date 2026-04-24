@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
@@ -17,7 +17,7 @@ interface User {
 
 export function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
-  const [page, setPage] = useState(1)
+  const [page] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
@@ -30,7 +30,6 @@ export function UsersPage() {
   })
 
   const roles = ['VIEWER', 'OPERATOR', 'ADMIN', 'ADMIN_MASTER']
-  const statuses = ['ativo', 'inativo']
 
   const fetchUsers = async () => {
     try {
@@ -69,7 +68,7 @@ export function UsersPage() {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchUsers()
   }, [page])
 
@@ -166,13 +165,14 @@ export function UsersPage() {
                   <td className="px-4 py-3 text-slate-50">{user.nome}</td>
                   <td className="px-4 py-3 text-slate-50">{user.email}</td>
                   <td className="px-4 py-3">
-                    <Badge label={user.role} color="blue" />
+                    <Badge variant="blue">{user.role}</Badge>
                   </td>
                   <td className="px-4 py-3">
                     <Badge
-                      label={user.status}
-                      color={user.status === 'ativo' ? 'green' : 'red'}
-                    />
+                      variant={user.status === 'ativo' ? 'green' : 'red'}
+                    >
+                      {user.status}
+                    </Badge>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Button
