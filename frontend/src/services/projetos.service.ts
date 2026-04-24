@@ -1,18 +1,12 @@
 import api from './api'
 import type { ApiResponse } from '../types/api'
-import type { Project, CreateProjectPayload, UpdateProjectPayload } from '../types/project'
+import type { Project, CreateProjectPayload, UpdateProjectPayload, ProjectStatusResponse } from '../types/project'
 
 interface PaginationParams {
   page?: number
   limit?: number
   status?: string
   tipo?: string
-}
-
-export interface ProjectStatusResponse {
-  id: number
-  status: string
-  lastUpdated: string
 }
 
 export const projetosService = {
