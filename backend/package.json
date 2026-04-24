@@ -8,8 +8,6 @@
     "dev": "nodemon src/server.js"
   },
   "dependencies": {
-    "@plagard/core": "*",
-    "@plagard/integrations": "*",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dockerode": "^4.0.2",
