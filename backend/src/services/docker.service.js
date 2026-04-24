@@ -609,6 +609,45 @@ async function getContainerLogs({ id, tail = 100, timestamps = false, user, ip, 
   }
 }
 
+async function removeContainer({ id, force = false, removeVolumes = false, user, ip, tenantScope }) {
+  const normalizedId = validateContainerRef(id);
+  ensureRole(user, ROLES.ADMIN, 'docker.container.remove', normalizedId);
+
+  let container = null;
+
+  try {
+    container = await withTimeout(resolveContainer(normalizedId, { user, tenantScope }), DOCKER_TIMEOUT_MS);
+    await withTimeout(
+      withDockerRetry('docker.remove', () =>
+        dockerIntegration.removeContainer(normalizedId, { force, removeVolumes })
+      ),
+      DOCKER_TIMEOUT_MS
+    );
+
+    await logAction(
+      getAuditContext({
+        user,
+        container,
+        action: 'docker.container.remove',
+        ip,
+        status: 'success',
+      })
+    );
+  } catch (err) {
+    await logAction(
+      getAuditContext({
+        user,
+        container: container || { fullId: normalizedId, name: normalizedId },
+        action: 'docker.container.remove',
+        ip,
+        status: 'failure',
+        error: mapDockerError(err).code || err.message,
+      })
+    );
+    throw mapDockerError(err);
+  }
+}
+
 module.exports = {
   listContainers,
   getContainer,
@@ -619,4 +658,5 @@ module.exports = {
   runContainer,
   stopManagedContainer,
   findManagedContainer,
+  removeContainer,
 };
