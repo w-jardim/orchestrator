@@ -40,7 +40,6 @@ CREATE TABLE IF NOT EXISTS `projetos` (
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY `unique_tenant_slug` (`tenant_id`, `slug`),
   FOREIGN KEY (`tenant_id`) REFERENCES `tenants`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON DELETE SET NULL,
   KEY `idx_tenant_id` (`tenant_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
