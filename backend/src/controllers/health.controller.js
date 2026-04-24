@@ -39,7 +39,9 @@ async function saude(req, res) {
 async function healthFull(req, res, next) {
   try {
     const payload = await getFullHealth();
-    return res.status(payload.status === 'ok' ? 200 : 503).json(payload);
+    // 503 apenas quando serviços críticos falham; 'degraded' (worker ausente) retorna 200
+    const httpStatus = payload.status === 'error' ? 503 : 200;
+    return res.status(httpStatus).json(payload);
   } catch (err) {
     return next(err);
   }

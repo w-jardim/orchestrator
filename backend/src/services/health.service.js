@@ -120,14 +120,14 @@ async function getFullHealth() {
 
   try {
     checks.worker = await getWorkerHealth(redis);
-    if (checks.worker.status !== 'ok') degraded = true;
+    // worker ausente não é crítico — não afeta serviços principais
   } catch (err) {
     checks.worker = { status: 'error', error: err.message };
-    degraded = true;
   }
 
+  const workerDegraded = checks.worker?.status !== 'ok';
   return {
-    status: degraded ? 'degraded' : 'ok',
+    status: degraded ? 'error' : (workerDegraded ? 'degraded' : 'ok'),
     version: process.env.npm_package_version || '1.0.0',
     environment: process.env.NODE_ENV || 'development',
     uptime: Math.floor(process.uptime()),
