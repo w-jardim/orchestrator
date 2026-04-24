@@ -5,10 +5,13 @@ import { Badge } from '../components/ui/Badge'
 import { Spinner } from '../components/ui/Spinner'
 import { ErrorState } from '../components/ui/ErrorState'
 import { usersService } from '../services/users.service'
+import { tenantsService } from '../services/tenants.service'
 import type { UserDetails } from '../types/user'
+import type { Tenant } from '../types/tenant'
 
 export function UsersPage() {
   const [users, setUsers] = useState<UserDetails[]>([])
+  const [tenants, setTenants] = useState<Tenant[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
@@ -27,14 +30,20 @@ export function UsersPage() {
     try {
       setLoading(true)
       setError(null)
-      const data = await usersService.list({ page: 1, limit: 50 })
-      setUsers(data)
+      const [userData, tenantData] = await Promise.all([
+        usersService.list({ page: 1, limit: 50 }),
+        tenantsService.list(),
+      ])
+      setUsers(userData)
+      setTenants(tenantData)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha ao carregar usuários')
     } finally {
       setLoading(false)
     }
   }
+
+  const needsTenant = formData.role !== 'ADMIN_MASTER'
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -120,24 +129,32 @@ export function UsersPage() {
               />
               <select
                 value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value, tenantId: '' })}
                 className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-slate-50"
               >
                 {roles.map((role) => (
                   <option key={role} value={role}>{role}</option>
                 ))}
               </select>
-              <input
-                type="number"
-                placeholder="Tenant ID (obrigatório exceto ADMIN_MASTER)"
-                value={formData.tenantId}
-                onChange={(e) => setFormData({ ...formData, tenantId: e.target.value })}
-                className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-slate-50"
-              />
+              {needsTenant && (
+                <select
+                  value={formData.tenantId}
+                  onChange={(e) => setFormData({ ...formData, tenantId: e.target.value })}
+                  required
+                  className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-slate-50"
+                >
+                  <option value="">Selecione o tenant</option>
+                  {tenants.map((t) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </select>
+              )}
             </div>
-            <p className="text-xs text-slate-500">
-              Tenant ID é obrigatório para roles VIEWER, OPERATOR e ADMIN.
-            </p>
+            {needsTenant && (
+              <p className="text-xs text-slate-500">
+                Selecione o tenant ao qual este usuário pertence.
+              </p>
+            )}
             <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700">
               Criar Usuário
             </Button>
