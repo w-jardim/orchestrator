@@ -4,27 +4,27 @@ import type { Deploy, CreateDeployPayload } from '../types/deploy'
 
 export const deploysService = {
   async list(): Promise<Deploy[]> {
-    const { data } = await api.get<ApiResponse<Deploy[]>>('/api/deploy')
+    const { data } = await api.get<ApiResponse<Deploy[]>>('/api/v1/deploy')
     return data.data
   },
 
   async get(id: number): Promise<Deploy> {
-    const { data } = await api.get<ApiResponse<Deploy>>(`/api/deploy/${id}`)
+    const { data } = await api.get<ApiResponse<Deploy>>(`/api/v1/deploy/${id}`)
     return data.data
   },
 
   async create(payload: CreateDeployPayload): Promise<Deploy> {
-    const { data } = await api.post<ApiResponse<Deploy>>('/api/deploy', payload)
+    const { data } = await api.post<ApiResponse<Deploy>>('/api/v1/deploy', payload)
     return data.data
   },
 
   async redeploy(id: number): Promise<Deploy> {
-    const { data } = await api.post<ApiResponse<Deploy>>(`/api/deploy/${id}/redeploy`)
+    const { data } = await api.post<ApiResponse<Deploy>>(`/api/v1/deploy/${id}/redeploy`)
     return data.data
   },
 
   async stop(id: number): Promise<Deploy> {
-    const { data } = await api.post<ApiResponse<Deploy>>(`/api/deploy/${id}/stop`)
+    const { data } = await api.post<ApiResponse<Deploy>>(`/api/v1/deploy/${id}/stop`)
     return data.data
   },
 }
