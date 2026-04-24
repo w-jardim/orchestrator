@@ -64,6 +64,7 @@ app.use((req, res, next) => {
 app.set('trust proxy', 1);
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
 app.get('/saude', saude);
 app.get('/health/full', healthFull);
 app.use(routes);
