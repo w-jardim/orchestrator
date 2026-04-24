@@ -42,6 +42,26 @@ services:
       retries: 3
       start_period: 30s
 
+  # Frontend (React + Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: orchestrator-frontend
+    ports:
+      - '3003:80'
+    depends_on:
+      - backend
+    networks:
+      - orchestrator
+    restart: always
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
   # MySQL Database
   mysql:
     image: mysql:8.0
