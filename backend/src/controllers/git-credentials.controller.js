@@ -19,12 +19,13 @@ async function listKeys(req, res, next) {
 
     const keys = gitCredentialsService.listSshKeys();
 
-    await auditoria.registrar({
-      acao: 'git:list_keys',
-      recurso: 'git-credentials',
-      usuario_id: req.user.id,
-      tenant_id: req.tenantScope.id,
-      ip: req.ip,
+    await auditoria.logAction({
+      tenantId: req.tenantScope.id,
+      userId: req.user.id,
+      role: req.user.role,
+      action: 'git:list_keys',
+      resource: 'git-credentials',
+      ipAddress: req.ip,
     });
 
     return res.json({ success: true, data: keys });
@@ -41,13 +42,14 @@ async function generateKey(req, res, next) {
 
     const keypair = gitCredentialsService.generateSshKeypair(name, comment);
 
-    await auditoria.registrar({
-      acao: 'git:generate_key',
-      recurso: 'git-credentials',
-      detalhes: { name },
-      usuario_id: req.user.id,
-      tenant_id: req.tenantScope.id,
-      ip: req.ip,
+    await auditoria.logAction({
+      tenantId: req.tenantScope.id,
+      userId: req.user.id,
+      role: req.user.role,
+      action: 'git:generate_key',
+      resource: 'git-credentials',
+      payload: { name },
+      ipAddress: req.ip,
     });
 
     return res.status(201).json({
@@ -71,13 +73,14 @@ async function addKey(req, res, next) {
 
     gitCredentialsService.addSshKey(name, privateKey, publicKey);
 
-    await auditoria.registrar({
-      acao: 'git:add_key',
-      recurso: 'git-credentials',
-      detalhes: { name },
-      usuario_id: req.user.id,
-      tenant_id: req.tenantScope.id,
-      ip: req.ip,
+    await auditoria.logAction({
+      tenantId: req.tenantScope.id,
+      userId: req.user.id,
+      role: req.user.role,
+      action: 'git:add_key',
+      resource: 'git-credentials',
+      payload: { name },
+      ipAddress: req.ip,
     });
 
     return res.status(201).json({
@@ -97,13 +100,14 @@ async function removeKey(req, res, next) {
 
     gitCredentialsService.removeSshKey(name);
 
-    await auditoria.registrar({
-      acao: 'git:remove_key',
-      recurso: 'git-credentials',
-      detalhes: { name },
-      usuario_id: req.user.id,
-      tenant_id: req.tenantScope.id,
-      ip: req.ip,
+    await auditoria.logAction({
+      tenantId: req.tenantScope.id,
+      userId: req.user.id,
+      role: req.user.role,
+      action: 'git:remove_key',
+      resource: 'git-credentials',
+      payload: { name },
+      ipAddress: req.ip,
     });
 
     return res.json({
@@ -123,13 +127,14 @@ async function getFingerprint(req, res, next) {
 
     const fingerprint = gitCredentialsService.getSshKeyFingerprint(name);
 
-    await auditoria.registrar({
-      acao: 'git:get_fingerprint',
-      recurso: 'git-credentials',
-      detalhes: { name },
-      usuario_id: req.user.id,
-      tenant_id: req.tenantScope.id,
-      ip: req.ip,
+    await auditoria.logAction({
+      tenantId: req.tenantScope.id,
+      userId: req.user.id,
+      role: req.user.role,
+      action: 'git:get_fingerprint',
+      resource: 'git-credentials',
+      payload: { name },
+      ipAddress: req.ip,
     });
 
     return res.json({
@@ -149,13 +154,14 @@ async function testAuth(req, res, next) {
 
     const result = gitCredentialsService.testGitAuth(repositoryUrl);
 
-    await auditoria.registrar({
-      acao: 'git:test_auth',
-      recurso: 'git-credentials',
-      detalhes: { repositoryUrl, success: result.success },
-      usuario_id: req.user.id,
-      tenant_id: req.tenantScope.id,
-      ip: req.ip,
+    await auditoria.logAction({
+      tenantId: req.tenantScope.id,
+      userId: req.user.id,
+      role: req.user.role,
+      action: 'git:test_auth',
+      resource: 'git-credentials',
+      payload: { repositoryUrl, success: result.success },
+      ipAddress: req.ip,
     });
 
     if (!result.success) {
@@ -183,13 +189,14 @@ async function configureGit(req, res, next) {
 
     gitCredentialsService.configureGitGlobal(name, email);
 
-    await auditoria.registrar({
-      acao: 'git:configure',
-      recurso: 'git-credentials',
-      detalhes: { name, email },
-      usuario_id: req.user.id,
-      tenant_id: req.tenantScope.id,
-      ip: req.ip,
+    await auditoria.logAction({
+      tenantId: req.tenantScope.id,
+      userId: req.user.id,
+      role: req.user.role,
+      action: 'git:configure',
+      resource: 'git-credentials',
+      payload: { name, email },
+      ipAddress: req.ip,
     });
 
     return res.json({
