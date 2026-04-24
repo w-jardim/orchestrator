@@ -14,38 +14,44 @@ interface ApiResponse<T> {
   pages?: number
 }
 
+function createApiClient(): AxiosInstance {
+  const client = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+
+  client.interceptors.request.use((config) => {
+    const token = getStoredToken()
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  })
+
+  client.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        clearStoredAuth()
+        window.dispatchEvent(new Event('plagard:auth-cleared'))
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login'
+        }
+      }
+      return Promise.reject(error)
+    }
+  )
+
+  return client
+}
+
 class ApiClient {
   private client: AxiosInstance
 
   constructor() {
-    this.client = axios.create({
-      baseURL: API_BASE_URL,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-
-    this.client.interceptors.request.use((config) => {
-      const token = getStoredToken()
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`
-      }
-      return config
-    })
-
-    this.client.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          clearStoredAuth()
-          window.dispatchEvent(new Event('plagard:auth-cleared'))
-          if (window.location.pathname !== '/login') {
-            window.location.href = '/login'
-          }
-        }
-        return Promise.reject(error)
-      }
-    )
+    this.client = createApiClient()
   }
 
   // ─── Authentication ─────────────────────────────────────────────
@@ -426,4 +432,5 @@ class ApiClient {
 }
 
 export const apiClient = new ApiClient()
-export default apiClient
+export const axiosClient = createApiClient()
+export default axiosClient
