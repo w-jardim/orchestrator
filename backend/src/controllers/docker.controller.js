@@ -109,4 +109,22 @@ async function logs(req, res, next) {
   }
 }
 
-module.exports = { list, inspect, start, stop, restart, logs };
+async function remove(req, res, next) {
+  try {
+    if (!handleValidation(req, res)) return;
+    const { force, removeVolumes } = req.body;
+    await dockerService.removeContainer({
+      id: req.params.id,
+      force: force === true || force === 'true',
+      removeVolumes: removeVolumes === true || removeVolumes === 'true',
+      user: req.user,
+      ip: req.ip,
+      tenantScope: req.tenantScope,
+    });
+    return res.json({ success: true, message: 'Container removido com sucesso' });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+module.exports = { list, inspect, start, stop, restart, logs, remove };

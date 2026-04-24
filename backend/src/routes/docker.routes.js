@@ -37,11 +37,17 @@ const validateListQuery = [
   query('tenantId').optional().isInt({ min: 1 }).withMessage('tenantId invalido'),
 ];
 
+const validateRemoveBody = [
+  body('force').optional().isBoolean().withMessage('force deve ser booleano'),
+  body('removeVolumes').optional().isBoolean().withMessage('removeVolumes deve ser booleano'),
+];
+
 router.get('/', requireRole(ROLES.VIEWER), validateListQuery, validate, controller.list);
 router.get('/:id', requireRole(ROLES.VIEWER), validateId, validate, controller.inspect);
 router.get('/:id/logs', requireRole(ROLES.OPERATOR), [...validateId, ...validateLogsQuery], validate, controller.logs);
 router.post('/:id/start', requireRole(ROLES.ADMIN), [...validateId, ...validateTimeout], validate, controller.start);
 router.post('/:id/stop', requireRole(ROLES.ADMIN), [...validateId, ...validateTimeout], validate, controller.stop);
 router.post('/:id/restart', requireRole(ROLES.ADMIN), [...validateId, ...validateTimeout], validate, controller.restart);
+router.delete('/:id', requireRole(ROLES.ADMIN), [...validateId, ...validateRemoveBody], validate, controller.remove);
 
 module.exports = router;
