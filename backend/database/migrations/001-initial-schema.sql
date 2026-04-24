@@ -12,18 +12,20 @@ CREATE TABLE IF NOT EXISTS `tenants` (
 
 -- Create users table
 CREATE TABLE IF NOT EXISTS `users` (
-  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `name` VARCHAR(255) NOT NULL,
-  `email` VARCHAR(255) NOT NULL UNIQUE,
-  `password_hash` VARCHAR(255) NOT NULL,
-  `role` ENUM('ADMIN_MASTER', 'ADMIN', 'OPERATOR', 'VIEWER') NOT NULL DEFAULT 'VIEWER',
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(120) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password_hash` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role` ENUM('ADMIN_MASTER', 'ADMIN', 'OPERATOR', 'VIEWER') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'VIEWER',
   `tenant_id` INT,
-  `active` BOOLEAN NOT NULL DEFAULT TRUE,
-  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (`tenant_id`) REFERENCES `tenants`(`id`) ON DELETE CASCADE,
-  KEY `idx_email` (`email`),
-  KEY `idx_tenant_id` (`tenant_id`)
+  `active` TINYINT(1) NOT NULL DEFAULT 1,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `uq_users_email` (`email`),
+  KEY `idx_users_role` (`role`),
+  KEY `idx_users_active` (`active`),
+  KEY `idx_tenant_id` (`tenant_id`),
+  FOREIGN KEY (`tenant_id`) REFERENCES `tenants`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Create projetos table
