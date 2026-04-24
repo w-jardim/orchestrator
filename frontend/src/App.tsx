@@ -10,6 +10,11 @@ import { DashboardPage } from './pages/DashboardPage'
 import { HealthPage } from './pages/HealthPage'
 import { ProjectsPage } from './pages/ProjectsPage'
 import { UsersPage } from './pages/UsersPage'
+import { TenantsPage } from './pages/TenantsPage'
+import { ImagesPage } from './pages/ImagesPage'
+import { GitCredentialsPage } from './pages/GitCredentialsPage'
+import { AmbientesPage } from './pages/AmbientesPage'
+import { ComponentesPage } from './pages/ComponentesPage'
 
 const pageTitles: Record<string, string> = {
   '/dashboard': 'Visão Geral Operacional',
@@ -18,6 +23,11 @@ const pageTitles: Record<string, string> = {
   '/health': 'Saúde',
   '/projects': 'Projetos',
   '/users': 'Usuários',
+  '/tenants': 'Tenants',
+  '/images': 'Docker Images',
+  '/git-credentials': 'Credenciais Git',
+  '/ambientes': 'Ambientes',
+  '/componentes': 'Componentes',
 }
 
 function AppShell() {
@@ -64,6 +74,11 @@ export default function App() {
           <Route path="/health" element={<HealthPage />} />
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/users" element={<UsersPage />} />
+          <Route path="/tenants" element={<TenantsPage />} />
+          <Route path="/images" element={<ImagesPage />} />
+          <Route path="/git-credentials" element={<GitCredentialsPage />} />
+          <Route path="/ambientes" element={<AmbientesPage />} />
+          <Route path="/componentes" element={<ComponentesPage />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Route>
