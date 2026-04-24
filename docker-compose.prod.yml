@@ -26,7 +26,7 @@ services:
       DOCKER_ALLOWED_IMAGES: ${DOCKER_ALLOWED_IMAGES}
     volumes:
       - ./logs/backend:/app/logs
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock:rw
     depends_on:
       mysql:
         condition: service_healthy
