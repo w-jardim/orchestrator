@@ -21,6 +21,6 @@ router.use('/api/v1/projetos', projetoRoutes);
 router.use('/api/v1/docker/containers', dockerRoutes);
 router.use('/api/v1/docker/images', dockerImagesRoutes);
 router.use('/api/v1/git/credentials', gitCredentialsRoutes);
-router.use('/api/deploy', deployRoutes);
+router.use('/api/v1/deploy', deployRoutes);
 
 module.exports = router;
