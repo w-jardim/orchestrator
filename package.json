@@ -13,7 +13,8 @@
     "dev:backend": "npm --workspace=backend run dev",
     "dev:worker": "npm --workspace=worker run dev",
     "start:backend": "npm --workspace=backend run start",
-    "start:worker": "npm --workspace=worker run start"
+    "start:worker": "npm --workspace=worker run start",
+    "validate:env": "node scripts/validate-env.js"
   },
   "engines": {
     "node": ">=20.0.0",
