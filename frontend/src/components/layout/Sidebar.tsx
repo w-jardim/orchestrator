@@ -43,6 +43,51 @@ const navItems: NavItem[] = [
       </svg>
     ),
   },
+  {
+    to: '/projects',
+    label: 'Projetos',
+    icon: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M3 7a2 2 0 012-2h14a2 2 0 012 2m0 0h2.25A2.25 2.25 0 0121 9.25v12.75A2.25 2.25 0 0118.75 24H5.25A2.25 2.25 0 013 21.75V9.25A2.25 2.25 0 015.25 7H3" />
+      </svg>
+    ),
+  },
+  {
+    to: '/users',
+    label: 'Usuários',
+    icon: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 001.591-.17 9.335 9.335 0 003.976-5.02 9.325 9.325 0 00-3.982-5.007 9.349 9.349 0 00-4.744-1.188 9.335 9.335 0 00-1.591.17A9.338 9.338 0 0015 19.128M12 12.5a3 3 0 110-6 3 3 0 010 6z" />
+      </svg>
+    ),
+  },
+  {
+    to: '/tenants',
+    label: 'Tenants',
+    icon: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+      </svg>
+    ),
+  },
+  {
+    to: '/images',
+    label: 'Images',
+    icon: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+    ),
+  },
+  {
+    to: '/git-credentials',
+    label: 'Git',
+    icon: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+      </svg>
+    ),
+  },
 ]
 
 export function Sidebar() {
