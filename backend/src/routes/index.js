@@ -9,6 +9,7 @@ const deployRoutes = require('./deploy.routes');
 const tenantRoutes = require('./tenant.routes');
 const userRoutes = require('./user.routes');
 const projetoRoutes = require('./projeto.routes');
+const gitCredentialsRoutes = require('./git-credentials.routes');
 
 const router = Router();
 
@@ -19,6 +20,7 @@ router.use('/api/v1/users', userRoutes);
 router.use('/api/v1/projetos', projetoRoutes);
 router.use('/api/v1/docker/containers', dockerRoutes);
 router.use('/api/v1/docker/images', dockerImagesRoutes);
+router.use('/api/v1/git/credentials', gitCredentialsRoutes);
 router.use('/api/deploy', deployRoutes);
 
 module.exports = router;
