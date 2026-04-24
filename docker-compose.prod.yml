@@ -43,7 +43,7 @@ services:
 
   # MySQL Database
   mysql:
-    image: mysql:8.0-alpine
+    image: mysql:8.0
     container_name: orchestrator-mysql
     expose:
       - '3306'
