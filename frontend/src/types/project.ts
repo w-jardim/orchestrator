@@ -12,7 +12,7 @@ export interface Project {
   updatedAt: string
 }
 
-export interface ProjectStatus {
+export interface ProjectStatusResponse {
   id: number
   status: string
   lastUpdated: string
