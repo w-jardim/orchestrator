@@ -525,7 +525,8 @@ async function stopContainer({ id, timeout = 10, user, ip, tenantScope }) {
 
   try {
     container = await withTimeout(resolveContainer(normalizedId, { user, tenantScope }), DOCKER_TIMEOUT_MS);
-    await withTimeout(withDockerRetry('docker.stop', () => dockerIntegration.stopContainer(normalizedId, { timeout: safeTimeout })), DOCKER_TIMEOUT_MS);
+    const stopTimeoutMs = (safeTimeout * 1000) + 10000;
+    await withTimeout(withDockerRetry('docker.stop', () => dockerIntegration.stopContainer(normalizedId, { t: safeTimeout })), stopTimeoutMs);
 
     await logAction(getAuditContext({
       user,
@@ -556,7 +557,8 @@ async function restartContainer({ id, timeout = 10, user, ip, tenantScope }) {
 
   try {
     container = await withTimeout(resolveContainer(normalizedId, { user, tenantScope }), DOCKER_TIMEOUT_MS);
-    await withTimeout(withDockerRetry('docker.restart', () => dockerIntegration.restartContainer(normalizedId, { timeout: safeTimeout })), DOCKER_TIMEOUT_MS);
+    const restartTimeoutMs = (safeTimeout * 1000) + 10000;
+    await withTimeout(withDockerRetry('docker.restart', () => dockerIntegration.restartContainer(normalizedId, { t: safeTimeout })), restartTimeoutMs);
 
     await logAction(getAuditContext({
       user,

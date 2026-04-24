@@ -135,6 +135,18 @@ function getAuditContext({ user, image, action, ip, timestamp = new Date().toISO
   };
 }
 
+function normalizeImage(img) {
+  return {
+    id: img.Id || img.id || '',
+    repoTags: img.RepoTags || img.repoTags || [],
+    repoDigests: img.RepoDigests || img.repoDigests || [],
+    size: img.Size || img.size || 0,
+    virtualSize: img.VirtualSize || img.virtualSize || 0,
+    created: img.Created || img.created || 0,
+    sharedSize: img.SharedSize || img.sharedSize || 0,
+  };
+}
+
 async function listImages({ user, ip } = {}) {
   ensureRole(user, ROLES.VIEWER, 'docker.images.list', null);
 
@@ -151,7 +163,7 @@ async function listImages({ user, ip } = {}) {
       })
     );
 
-    return images || [];
+    return (images || []).map(normalizeImage);
   } catch (err) {
     await logAction(
       getAuditContext({
