@@ -47,6 +47,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
+      args:
+        VITE_API_URL: ${VITE_API_URL:-https://orchestrator.plagardsystems.com.br}
     container_name: orchestrator-frontend
     ports:
       - '3003:80'
