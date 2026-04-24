@@ -4,29 +4,21 @@ import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
 import { Spinner } from '../components/ui/Spinner'
 import { ErrorState } from '../components/ui/ErrorState'
-import { apiClient } from '../services/api'
-
-interface User {
-  id: number
-  email: string
-  nome: string
-  role: string
-  status: string
-  created_at: string
-}
+import { usersService } from '../services/users.service'
+import type { UserDetails } from '../types/user'
 
 export function UsersPage() {
-  const [users, setUsers] = useState<User[]>([])
-  const [page] = useState(1)
+  const [users, setUsers] = useState<UserDetails[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
-    nome: '',
+    name: '',
     email: '',
     password: '',
     role: 'VIEWER',
-    status: 'ativo',
+    tenantId: '',
   })
 
   const roles = ['VIEWER', 'OPERATOR', 'ADMIN', 'ADMIN_MASTER']
@@ -34,10 +26,9 @@ export function UsersPage() {
   const fetchUsers = async () => {
     try {
       setLoading(true)
-      const response = await apiClient.listUsers(page, 10)
-      if (response.success && response.data) {
-        setUsers(response.data)
-      }
+      setError(null)
+      const data = await usersService.list({ page: 1, limit: 50 })
+      setUsers(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha ao carregar usuários')
     } finally {
@@ -47,20 +38,27 @@ export function UsersPage() {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()
+    setFormError(null)
     try {
-      await apiClient.createUser(formData)
-      setFormData({ nome: '', email: '', password: '', role: 'VIEWER', status: 'ativo' })
+      await usersService.create({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role as UserDetails['role'],
+        tenantId: formData.tenantId ? Number(formData.tenantId) : undefined,
+      })
+      setFormData({ name: '', email: '', password: '', role: 'VIEWER', tenantId: '' })
       setShowForm(false)
       await fetchUsers()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao criar usuário')
+      setFormError(err instanceof Error ? err.message : 'Falha ao criar usuário')
     }
   }
 
   const handleDeleteUser = async (id: number) => {
     if (confirm('Tem certeza que deseja deletar este usuário?')) {
       try {
-        await apiClient.deleteUser(id)
+        await usersService.delete(id)
         await fetchUsers()
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Falha ao deletar usuário')
@@ -70,7 +68,7 @@ export function UsersPage() {
 
   useEffect(() => {
     fetchUsers()
-  }, [page])
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -87,12 +85,17 @@ export function UsersPage() {
       {showForm && (
         <Card className="bg-slate-800/50 p-6">
           <form onSubmit={handleCreateUser} className="space-y-4">
+            {formError && (
+              <div className="rounded-lg bg-red-900/30 border border-red-700 px-4 py-3 text-sm text-red-300">
+                {formError}
+              </div>
+            )}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <input
                 type="text"
                 placeholder="Nome"
-                value={formData.nome}
-                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
                 className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-slate-50"
               />
@@ -105,13 +108,14 @@ export function UsersPage() {
                 className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-slate-50"
               />
             </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <input
                 type="password"
-                placeholder="Senha"
+                placeholder="Senha (mín. 8 caracteres)"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
+                minLength={8}
                 className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-slate-50"
               />
               <select
@@ -120,12 +124,20 @@ export function UsersPage() {
                 className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-slate-50"
               >
                 {roles.map((role) => (
-                  <option key={role} value={role}>
-                    {role}
-                  </option>
+                  <option key={role} value={role}>{role}</option>
                 ))}
               </select>
+              <input
+                type="number"
+                placeholder="Tenant ID (obrigatório exceto ADMIN_MASTER)"
+                value={formData.tenantId}
+                onChange={(e) => setFormData({ ...formData, tenantId: e.target.value })}
+                className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-slate-50"
+              />
             </div>
+            <p className="text-xs text-slate-500">
+              Tenant ID é obrigatório para roles VIEWER, OPERATOR e ADMIN.
+            </p>
             <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700">
               Criar Usuário
             </Button>
@@ -156,23 +168,27 @@ export function UsersPage() {
                 <th className="text-left px-4 py-2 text-slate-300 font-semibold">Email</th>
                 <th className="text-left px-4 py-2 text-slate-300 font-semibold">Role</th>
                 <th className="text-left px-4 py-2 text-slate-300 font-semibold">Status</th>
+                <th className="text-left px-4 py-2 text-slate-300 font-semibold">Tenant</th>
                 <th className="text-right px-4 py-2 text-slate-300 font-semibold">Ações</th>
               </tr>
             </thead>
             <tbody>
               {users.map((user) => (
                 <tr key={user.id} className="border-b border-slate-700 hover:bg-slate-800/30">
-                  <td className="px-4 py-3 text-slate-50">{user.nome}</td>
-                  <td className="px-4 py-3 text-slate-50">{user.email}</td>
+                  <td className="px-4 py-3 text-slate-50">{user.name}</td>
+                  <td className="px-4 py-3 text-slate-300">{user.email}</td>
                   <td className="px-4 py-3">
-                    <Badge variant="blue">{user.role}</Badge>
+                    <Badge variant={user.role === 'ADMIN_MASTER' ? 'red' : user.role === 'ADMIN' ? 'blue' : 'default'}>
+                      {user.role}
+                    </Badge>
                   </td>
                   <td className="px-4 py-3">
-                    <Badge
-                      variant={user.status === 'ativo' ? 'green' : 'red'}
-                    >
-                      {user.status}
+                    <Badge variant={user.active ? 'green' : 'red'}>
+                      {user.active ? 'Ativo' : 'Inativo'}
                     </Badge>
+                  </td>
+                  <td className="px-4 py-3 text-slate-400 text-sm">
+                    {user.tenant_id ?? '—'}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Button

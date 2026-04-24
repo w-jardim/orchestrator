@@ -6,9 +6,10 @@ export interface UserDetails {
   email: string
   role: UserRole
   active: boolean
-  tenantId?: number
-  createdAt: string
-  updatedAt: string
+  tenant_id?: number | null
+  tenantId?: number | null
+  created_at?: string
+  createdAt?: string
 }
 
 export interface CreateUserPayload {
