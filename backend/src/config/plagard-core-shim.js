@@ -54,8 +54,29 @@ module.exports = {
   queue: {
     QUEUES: {
       DEPLOY: 'deploy',
+      TASKS: 'tasks',
     },
-    getQueue: () => null,
+    getQueue: () => ({
+      getJobCounts: async () => ({ waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 }),
+    }),
+    getQueueConnection: () => ({
+      status: 'ready',
+      connect: async () => {},
+      ping: async () => 'PONG',
+    }),
     enqueueDeploy: () => Promise.resolve(),
+  },
+  integrations: {
+    docker: {
+      listContainers: async (options) => {
+        try {
+          const Docker = require('dockerode');
+          const docker = new Docker();
+          return await docker.listContainers(options || { all: false });
+        } catch (err) {
+          return [];
+        }
+      },
+    },
   },
 };
