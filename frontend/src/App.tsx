@@ -8,12 +8,16 @@ import { DeploysPage } from './pages/DeploysPage'
 import { LoginPage } from './pages/LoginPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { HealthPage } from './pages/HealthPage'
+import { ProjectsPage } from './pages/ProjectsPage'
+import { UsersPage } from './pages/UsersPage'
 
 const pageTitles: Record<string, string> = {
   '/dashboard': 'Visão Geral Operacional',
   '/containers': 'Containers',
   '/deploys': 'Deploys',
   '/health': 'Saúde',
+  '/projects': 'Projetos',
+  '/users': 'Usuários',
 }
 
 function AppShell() {
@@ -58,6 +62,8 @@ export default function App() {
           <Route path="/containers" element={<ContainersPage />} />
           <Route path="/deploys" element={<DeploysPage />} />
           <Route path="/health" element={<HealthPage />} />
+          <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/users" element={<UsersPage />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Route>
