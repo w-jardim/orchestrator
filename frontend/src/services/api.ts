@@ -1,7 +1,16 @@
 import axios, { AxiosInstance } from 'axios'
 import { clearStoredAuth, getStoredToken } from './auth-storage'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || ''
+// Use config dinâmica em tempo de execução (não buildada)
+declare global {
+  interface Window {
+    APP_CONFIG?: {
+      API_URL: string
+    }
+  }
+}
+
+const API_BASE_URL = (typeof window !== 'undefined' && window.APP_CONFIG?.API_URL) || ''
 
 interface ApiResponse<T> {
   success: boolean
