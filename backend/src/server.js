@@ -4,7 +4,7 @@ require('dotenv').config();
 const config = require('./config/environment');
 
 const app = require('./app');
-const logger = require('../config/plagard-core-shim').logger;
+const logger = require('./config/plagard-core-shim').logger;
 const { checkDatabaseConnection } = require('./config/database');
 const { checkRedisConnection } = require('./config/redis');
 
