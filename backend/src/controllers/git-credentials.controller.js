@@ -2,7 +2,7 @@
 
 const { validationResult } = require('express-validator');
 const gitCredentialsService = require('../services/git-credentials.service');
-const auditoria = require('../services/auditoria.service');
+const auditoria = require('../services/audit.service');
 
 function handleValidation(req, res) {
   const errors = validationResult(req);
