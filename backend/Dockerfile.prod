@@ -14,18 +14,12 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init curl
+# Install dumb-init, curl and docker CLI for Docker integration
+RUN apk add --no-cache dumb-init curl docker-cli
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
-
-# Copy from builder with correct ownership (mais eficiente que chown -R)
-COPY --from=builder --chown=nodejs:nodejs /build/node_modules ./node_modules
-COPY --from=builder --chown=nodejs:nodejs /build . .
-
-USER nodejs
+# Copy from builder
+COPY --from=builder /build/node_modules ./node_modules
+COPY --from=builder /build . .
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
