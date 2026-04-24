@@ -5,7 +5,7 @@ const { body, param, query } = require('express-validator');
 const componenteController = require('../controllers/componente.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
 const rbac = require('../middlewares/rbac');
-const { tenantContext } = require('../middlewares/tenant-context.middleware');
+const tenantContext = require('../middlewares/tenant-context.middleware');
 const componenteService = require('../services/componente.service');
 
 const router = express.Router({ mergeParams: true });
