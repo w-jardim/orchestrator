@@ -1,17 +1,20 @@
 'use strict';
 
 require('dotenv').config();
+const config = require('./config/environment');
 
 const app = require('./app');
 const logger = require('@plagard/core/src/logger');
 const { checkDatabaseConnection } = require('./config/database');
 const { checkRedisConnection } = require('./config/redis');
 
-const PORT = Number(process.env.PORT) || 3000;
-
 async function bootstrap() {
   try {
     logger.info('Starting Plagard Orchestrator backend...');
+    logger.info('Environment loaded', {
+      environment: config.NODE_ENV,
+      port: config.PORT,
+    });
 
     await checkDatabaseConnection();
     // seed admin user after DB connection
@@ -19,10 +22,10 @@ async function bootstrap() {
     await seedAdmin();
     await checkRedisConnection();
 
-    const server = app.listen(PORT, () => {
-      logger.info(`Backend running on port ${PORT}`, {
-        environment: process.env.NODE_ENV,
-        port: PORT,
+    const server = app.listen(config.PORT, () => {
+      logger.info(`Backend running on port ${config.PORT}`, {
+        environment: config.NODE_ENV,
+        port: config.PORT,
       });
     });
 
