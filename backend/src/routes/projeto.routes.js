@@ -7,6 +7,8 @@ const { authenticate } = require('../middlewares/auth.middleware');
 const { rbac } = require('../middlewares/rbac');
 const { tenantContext } = require('../middlewares/tenant-context.middleware');
 const projetoService = require('../services/projeto.service');
+const ambienteRoutes = require('./ambiente.routes');
+const componenteRoutes = require('./componente.routes');
 
 const router = express.Router();
 
@@ -82,5 +84,9 @@ router.delete(
   param('id').isInt({ min: 1 }).toInt(),
   projetoController.deletar,
 );
+
+// Sub-rotas: Ambientes e Componentes
+router.use('/:projetoId/ambientes', ambienteRoutes);
+router.use('/:projetoId/componentes', componenteRoutes);
 
 module.exports = router;
