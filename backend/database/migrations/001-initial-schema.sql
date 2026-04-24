@@ -37,11 +37,12 @@ CREATE TABLE IF NOT EXISTS `projetos` (
   `slug` VARCHAR(100) NOT NULL,
   `status` ENUM('criacao', 'configuracao', 'ativo', 'pausado', 'deletado') NOT NULL DEFAULT 'criacao',
   `tipo` ENUM('nodejs', 'python', 'docker', 'static', 'custom') NOT NULL DEFAULT 'custom',
-  `created_by` INT,
+  `created_by` BIGINT UNSIGNED,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY `unique_tenant_slug` (`tenant_id`, `slug`),
   FOREIGN KEY (`tenant_id`) REFERENCES `tenants`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON DELETE SET NULL,
   KEY `idx_tenant_id` (`tenant_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -93,7 +94,7 @@ CREATE TABLE IF NOT EXISTS `deploys` (
   `versao` VARCHAR(50),
   `status` ENUM('pendente', 'em_progresso', 'sucesso', 'falha', 'cancelado') NOT NULL DEFAULT 'pendente',
   `mensagem` TEXT,
-  `created_by` INT,
+  `created_by` BIGINT UNSIGNED,
   `started_at` TIMESTAMP NULL,
   `completed_at` TIMESTAMP NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
