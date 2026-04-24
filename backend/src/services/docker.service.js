@@ -3,8 +3,8 @@
 const dockerIntegration = require('@plagard/integrations/docker');
 const { logAction } = require('./audit.service');
 const { AppError } = require('../middlewares/error.middleware');
-const logger = require('@plagard/core/src/logger');
-const { hasMinimumRole, ROLES } = require('@plagard/core/src/policies');
+const logger = require('../config/plagard-core-shim').logger;
+const { hasMinimumRole, ROLES } = require('../config/plagard-core-shim').policies;
 
 const DOCKER_TIMEOUT_MS = Number(process.env.DOCKER_TIMEOUT_MS) || 5000;
 const DOCKER_RUN_TIMEOUT_MS = Number(process.env.DOCKER_RUN_TIMEOUT_MS) || Math.max(DOCKER_TIMEOUT_MS, 30000);

@@ -2,7 +2,7 @@
 
 const express = require('express');
 const { param, body, query } = require('express-validator');
-const { ROLES } = require('@plagard/core/src/policies');
+const { ROLES } = require('../config/plagard-core-shim').policies;
 const controller = require('../controllers/docker-images.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
 const { requireRole } = require('../middlewares/rbac');

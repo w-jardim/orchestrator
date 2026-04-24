@@ -2,7 +2,7 @@
 
 const { checkDatabaseConnection } = require('../config/database');
 const { getRedisClient } = require('../config/redis');
-const logger = require('@plagard/core/src/logger');
+const logger = require('../config/plagard-core-shim').logger;
 const { getFullHealth } = require('../services/health.service');
 
 async function saude(req, res) {

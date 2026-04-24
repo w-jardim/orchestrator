@@ -1,6 +1,6 @@
 'use strict';
 
-const logger = require('@plagard/core/src/logger');
+const logger = require('../config/plagard-core-shim').logger;
 
 class AppError extends Error {
   constructor(message, statusCode = 500, code = 'INTERNAL_ERROR') {

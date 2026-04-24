@@ -2,7 +2,7 @@
 
 const { Router } = require('express');
 const { body, param } = require('express-validator');
-const { ROLES } = require('@plagard/core/src/policies');
+const { ROLES } = require('../config/plagard-core-shim').policies;
 const controller = require('../controllers/git-credentials.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
 const { requireRole } = require('../middlewares/rbac');

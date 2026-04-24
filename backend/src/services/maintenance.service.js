@@ -1,7 +1,7 @@
 'use strict';
 
 const dockerIntegration = require('@plagard/integrations/docker');
-const logger = require('@plagard/core/src/logger');
+const logger = require('../config/plagard-core-shim').logger;
 const { getDatabase } = require('../config/database');
 const { logAction } = require('./audit.service');
 const deployService = require('./deploy.service');

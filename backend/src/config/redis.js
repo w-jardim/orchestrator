@@ -1,7 +1,7 @@
 'use strict';
 
 const { Redis } = require('ioredis');
-const logger = require('@plagard/core/src/logger');
+const logger = require('../config/plagard-core-shim').logger;
 
 let _client = null;
 

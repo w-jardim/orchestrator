@@ -1,9 +1,9 @@
 'use strict';
 
-const { signAccessToken } = require('@plagard/core/src/auth/jwt');
+const { signAccessToken } = require('../config/plagard-core-shim').auth.jwt;
 const { findByEmail, validatePassword } = require('./user.service');
 const { AppError } = require('../middlewares/error.middleware');
-const logger = require('@plagard/core/src/logger');
+const logger = require('../config/plagard-core-shim').logger;
 
 async function login(email, password) {
   const user = await findByEmail(email.toLowerCase());

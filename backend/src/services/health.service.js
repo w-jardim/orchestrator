@@ -1,7 +1,7 @@
 'use strict';
 
 const dockerIntegration = require('@plagard/integrations/docker');
-const { getQueue, QUEUES } = require('@plagard/core/src/queue');
+const { getQueue, QUEUES } = require('../config/plagard-core-shim').queue;
 const { getQueueConnection } = require('@plagard/core/src/queue/connection');
 const { checkDatabaseConnection } = require('../config/database');
 const { getRedisClient } = require('../config/redis');

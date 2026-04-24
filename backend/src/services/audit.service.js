@@ -1,7 +1,7 @@
 'use strict';
 
 const { getDatabase } = require('../config/database');
-const logger = require('@plagard/core/src/logger');
+const logger = require('../config/plagard-core-shim').logger;
 
 async function logAction({
   tenantId = null,
