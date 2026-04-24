@@ -2,9 +2,8 @@
 
 const { authorize } = require('./auth.middleware');
 
-// thin wrapper to keep middleware namespace consistent
-function requireRole(role) {
+function rbac(role) {
   return authorize(role);
 }
 
-module.exports = { requireRole };
+module.exports = rbac;
