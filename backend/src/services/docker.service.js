@@ -264,7 +264,12 @@ function ensureTenantContainerAccess(container, user, tenantScope, requestedId) 
 }
 
 async function resolveContainer(id, { user, tenantScope, requireAllowedInternal = true } = {}) {
-  const container = await withDockerRetry('docker.inspect', () => dockerIntegration.inspectContainer(id));
+  const containers = await withDockerRetry('docker.list', () => dockerIntegration.listContainers({ all: true }));
+  const container = containers.find(c => c.Id === id || c.Id.startsWith(id));
+
+  if (!container) {
+    throw new AppError('Container não encontrado', 404, 'CONTAINER_NOT_FOUND');
+  }
 
   if (user?.role === ROLES.ADMIN_MASTER) {
     if (!tenantScope?.tenantId) return container;
