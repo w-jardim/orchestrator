@@ -88,7 +88,7 @@ async function deleteUser(id) {
 async function listUsers(tenantId, { page = 1, limit = 20, role = null } = {}) {
   const db = getDatabase();
 
-  const query = db(TABLE).where({ tenant_id: tenantId });
+  const query = tenantId != null ? db(TABLE).where({ tenant_id: tenantId }) : db(TABLE);
   if (role) query.where({ role });
 
   const total = await query.clone().count('* as count').first();

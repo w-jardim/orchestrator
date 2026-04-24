@@ -53,10 +53,10 @@ async function list(req, res, next) {
     const userRole = req.user.role;
     const tenantId = req.user.tenant_id;
 
-    // ADMIN_MASTER sem tenant pode listar de um tenant específico via query
+    // ADMIN_MASTER pode listar todos ou filtrar por tenant; outros usuários ficam restritos ao próprio tenant
     let searchTenantId = tenantId;
-    if (userRole === 'ADMIN_MASTER' && req.query.tenantId) {
-      searchTenantId = Number(req.query.tenantId);
+    if (userRole === 'ADMIN_MASTER') {
+      searchTenantId = req.query.tenantId ? Number(req.query.tenantId) : null;
     } else if (!searchTenantId) {
       throw new AppError('Tenant obrigatório', 422, 'TENANT_REQUIRED');
     }
